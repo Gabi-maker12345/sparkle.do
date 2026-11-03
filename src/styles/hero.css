@@ -8,8 +8,13 @@
 
 .hero-stage {
   --p: 0;
-  --face: 0;
   --exit: 0;
+  --final-scale: 0.65;
+  --final-x: calc(clamp(2rem, 5vw, 6rem) + 95px);
+  --rot-x: 6deg;
+  --rot-y: 32deg;
+  --rot-z: -26deg;
+  --pencil-scale: 0.78;
   position: sticky;
   top: 0;
   height: 100svh;
@@ -103,13 +108,13 @@
 }
 
 .pencil-rig {
-  --side: 46px;
-  --len: 450px;
-  --tip: 96px;
+  --side: 56px;
+  --len: 400px;
+  --tip: 90px;
   --cap: 30px;
-  --lead: 21px;
+  --lead: 20px;
   --apothem: calc(var(--side) * 0.866);
-  --tip-tilt: -26.3deg;
+  --tip-tilt: -35.3deg;
   position: absolute;
   width: var(--side);
   height: calc(var(--len) + var(--tip) + var(--cap));
@@ -118,21 +123,17 @@
 }
 
 .pencil-intro {
-  --s0: 0.78;
-  --s1: 7.5;
-  --rx0: 6deg;
-  --rx1: 8deg;
-  --ry0: 32deg;
-  --ry1: 40deg;
-  --rz0: -26deg;
-  --rz1: -213deg;
   left: 50%;
   top: 48%;
-  transform: translate(calc(-50% - var(--p) * 45vw), -50%)
-    rotateX(calc(var(--rx0) + var(--p) * var(--rx1)))
-    rotateY(calc(var(--ry0) + var(--p) * var(--ry1)))
-    rotateZ(calc(var(--rz0) + var(--p) * var(--rz1)))
-    scale(calc(var(--s0) + var(--p) * var(--s1)));
+  transform: translate(
+      calc(-50% + (var(--final-x) - 50vw) * var(--exit)),
+      -50%
+    )
+    rotateX(var(--rot-x))
+    rotateY(var(--rot-y))
+    rotateZ(var(--rot-z))
+    scale(var(--pencil-scale));
+  transform-origin: 50% 50%;
 }
 
 .pencil-spin {
@@ -141,6 +142,12 @@
   transform-style: preserve-3d;
   animation: pencilIdle 12s linear infinite;
   will-change: transform;
+}
+.hero.is-entering .pencil-spin,
+.hero.is-world .pencil-spin,
+.hero.is-exiting .pencil-spin {
+  animation: none;
+  transform: rotateY(0deg);
 }
 @keyframes pencilIdle {
   from { transform: rotateY(0deg); }
@@ -319,27 +326,43 @@
     linear-gradient(90deg, #e2b9a1 0%, #f4d9c4 22%, #f9e5d2 50%, #f1d2b9 72%, #d8ab92 100%);
 }
 
-/* ---------- one pencil face becomes the panel ---------- */
-.hero-face {
+/* ---------- the body face becomes the panel ---------- */
+.pencil-panel-face {
   position: absolute;
   left: 50%;
-  top: calc(48% + 2% * var(--face));
+  top: 0;
   z-index: 2;
-  width: calc(46px + (100vw - 46px) * var(--face));
-  height: calc(320px + (100svh - 320px) * var(--face));
-  transform: translate(-50%, -50%) rotate(calc(-26deg * (1 - var(--face)))) scale(calc(1 - var(--exit) * 0.92));
-  border-radius: calc((1 - var(--face)) * 8px);
-  opacity: min(clamp(0, calc(var(--face) * 5), 1), calc(1 - var(--exit)));
-  overflow: hidden;
+  width: var(--side);
+  height: var(--len);
+  margin-left: calc(var(--side) / -2);
+  transform: translateZ(calc(var(--apothem) - 0.2px));
+  background: linear-gradient(90deg, #e6bcb0 0%, #f6dbd1 46%, #eec7bc 100%);
+  box-shadow:
+    inset 1px 0 0 rgba(78, 30, 42, 0.2),
+    inset -1px 0 0 rgba(78, 30, 42, 0.22);
+}
+
+.hero-panel-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
   pointer-events: none;
   background:
     radial-gradient(120% 90% at 24% 16%, #fff8ee 0%, transparent 46%),
     radial-gradient(100% 80% at 80% 90%, #efc4b9 0%, transparent 58%),
     var(--peach);
-  box-shadow: inset 0 0 0 calc((1 - var(--face)) * 1px) rgba(78, 30, 42, 0.27);
-  will-change: width, height, transform, opacity;
 }
-.hero-face-print {
+.hero-panel-decor {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+.hero.is-chapters .hero-panel-decor { opacity: 1; }
+.hero-panel-print {
   position: absolute;
   left: 6vw;
   bottom: 5vh;
@@ -348,17 +371,17 @@
   line-height: 0.8;
   letter-spacing: -0.04em;
   color: var(--wine);
-  opacity: clamp(0, calc((var(--face) - 0.7) * 4), 0.09);
+  opacity: 0.08;
   white-space: nowrap;
 }
-.hero-face-star {
+.hero-panel-star {
   position: absolute;
   right: 6vw;
   top: 12vh;
   font-size: clamp(3rem, 8vw, 8rem);
   line-height: 1;
   color: var(--wine);
-  opacity: clamp(0, calc((var(--face) - 0.66) * 3), 0.16);
+  opacity: 0.16;
 }
 
 /* ---------- three story blocks ---------- */
@@ -572,15 +595,15 @@
   transform: translateX(4px);
 }
 
-/* ---------- leaving the world: the pencil shrinks back ---------- */
+/* ---------- final card behind the same pencil ---------- */
 .pencil-dock {
   position: absolute;
-  left: clamp(2rem, 5vw, 6rem);
+  left: var(--final-x);
   top: 50%;
-  z-index: 5;
+  z-index: 2;
   width: 190px;
   height: 380px;
-  transform: translateY(-50%) translateX(calc(-24px * (1 - var(--exit))))
+  transform: translate(-50%, -50%) translateX(calc(-24px * (1 - var(--exit))))
     rotate(-3deg) scale(calc(0.96 + 0.04 * var(--exit)));
   border: 1px solid rgba(255, 244, 236, 0.14);
   border-radius: 3px;
@@ -590,7 +613,7 @@
   box-shadow:
     0 34px 70px rgba(48, 10, 20, 0.26),
     0 1px 0 rgba(255, 255, 255, 0.25) inset;
-  opacity: clamp(0, calc((var(--exit) - 0.28) * 2.8), 1);
+  opacity: clamp(0, calc((var(--exit) - 0.32) * 2.6), 1);
   visibility: hidden;
 }
 .hero.is-exit .pencil-dock { visibility: visible; }
@@ -624,40 +647,6 @@
   opacity: 0.6;
 }
 
-.pencil-final-shadow {
-  position: absolute;
-  left: calc(clamp(2rem, 5vw, 6rem) + 95px);
-  top: calc(50% + 160px);
-  z-index: 4;
-  width: 210px;
-  height: 32px;
-  transform: translateX(-50%) rotate(-4deg);
-  border-radius: 50%;
-  background: radial-gradient(50% 50% at 50% 50%, rgba(48, 10, 20, 0.32), transparent 72%);
-  filter: blur(10px);
-  opacity: clamp(0, calc((var(--exit) - 0.42) * 2.5), 1);
-}
-
-.pencil-final {
-  --side: 38px;
-  --len: 310px;
-  --tip: 66px;
-  --cap: 22px;
-  --lead: 15px;
-  --apothem: calc(var(--side) * 0.866);
-  --tip-tilt: -33.3deg;
-  left: calc(clamp(2rem, 5vw, 6rem) + 95px);
-  top: 50%;
-  z-index: 6;
-  opacity: clamp(0, calc(var(--exit) * 4), 1);
-  visibility: hidden;
-  transform: translate(-50%, -50%)
-    rotateY(calc(14deg * var(--exit)))
-    rotateZ(calc(-2deg * var(--exit)))
-    scale(calc(2 - 1.18 * var(--exit)));
-}
-.hero.is-exit .pencil-final { visibility: visible; }
-
 .hero-final-copy {
   position: absolute;
   right: 6vw;
@@ -672,12 +661,8 @@
   visibility: hidden;
   pointer-events: none;
 }
-.hero.is-exit .hero-final-copy {
-  visibility: visible;
-}
-.hero.is-final .hero-final-copy {
-  pointer-events: auto;
-}
+.hero.is-exit .hero-final-copy { visibility: visible; }
+.hero.is-final .hero-final-copy { pointer-events: auto; }
 .hero-final-kicker {
   margin: 0;
   font-family: var(--font-label);
@@ -687,9 +672,7 @@
   text-transform: uppercase;
   color: var(--wine-mid);
 }
-.hero-final-copy .story-cta {
-  margin-top: 0;
-}
+.hero-final-copy .story-cta { margin-top: 0; }
 
 /* ---------- chapter progress ---------- */
 .hero-progress {
@@ -772,11 +755,18 @@
   50% { transform: scaleY(1); opacity: 1; }
 }
 
-/* Once the panel opens, retire every opening layer so its animation stops. */
+/* The camera enters the body face: only the face is left inside the world. */
+.hero.is-entering .pencil-cap,
+.hero.is-world .pencil-cap,
+.hero.is-exiting .pencil-cap,
+.hero.is-world .pencil-tip,
+.hero.is-world .pencil-body > *:not(.pencil-panel-face) {
+  display: none;
+}
+.hero.is-panel .pencil-shadow,
 .hero.is-panel .hero-float,
 .hero.is-panel .hero-emojis,
 .hero.is-panel .hero-kicker,
-.hero.is-panel .hero-pencil-wrap,
 .hero.is-panel .hero-cue {
   display: none;
 }
@@ -784,18 +774,16 @@
 /* ---------- responsive ---------- */
 @media (max-width: 1180px) {
   .hero-story { padding-inline: 5vw; }
-  .pencil-rig { --side: 40px; --len: 390px; --tip: 82px; --cap: 26px; --lead: 18px; --tip-tilt: -27.1deg; }
-  .pencil-final { --side: 32px; --len: 260px; --tip: 56px; --cap: 19px; --lead: 13px; --tip-tilt: -33.7deg; }
+  .hero-stage { --final-scale: 0.62; --final-x: calc(clamp(2rem, 5vw, 6rem) + 80px); }
+  .pencil-rig { --side: 48px; --len: 380px; --tip: 84px; --cap: 28px; --lead: 18px; --tip-tilt: -32.2deg; }
   .pencil-dock { width: 160px; height: 320px; }
   .pencil-dock-star { right: 16px; top: 14px; font-size: 17px; }
-  .pencil-final { left: calc(clamp(2rem, 5vw, 6rem) + 80px); }
-  .pencil-final-shadow { left: calc(clamp(2rem, 5vw, 6rem) + 80px); width: 180px; }
 }
 
 @media (max-width: 860px) {
   .hero { height: 390vh; }
-  .pencil-intro { --s0: 0.6; --s1: 6; --ry0: 30deg; --ry1: 28deg; --rz0: -24deg; --rz1: -220deg; }
-  .pencil-rig { --side: 34px; --len: 340px; --tip: 74px; --cap: 23px; --lead: 16px; --tip-tilt: -25.6deg; }
+  .hero-stage { --final-scale: 0.55; --final-x: 83px; }
+  .pencil-rig { --side: 40px; --len: 340px; --tip: 76px; --cap: 25px; --lead: 16px; --tip-tilt: -29.7deg; }
   .pencil-shadow { top: calc(48% + 200px); }
   .story-title { font-size: clamp(3.8rem, 13vw, 6rem); }
   .story-h2 { font-size: clamp(2.5rem, 7.6vw, 3.8rem); }
@@ -803,8 +791,7 @@
   .story-caps { gap: 10px; }
   .pencil-dock { left: 18px; width: 130px; height: 260px; }
   .pencil-dock-star { right: 12px; top: 10px; font-size: 14px; }
-  .pencil-final { left: 84px; --side: 27px; --len: 208px; --tip: 46px; --cap: 16px; --lead: 11px; --tip-tilt: -35.8deg; }
-  .pencil-final-shadow { left: 84px; top: calc(50% + 120px); width: 140px; }
+
   .story-block-3 .story-h2 { font-size: clamp(1.85rem, 8vw, 2.4rem); max-width: none; }
   .story-block-3 .story-lede { font-size: 0.9rem; }
   .story-block-3 .story-cta { margin-top: 20px; }
@@ -825,8 +812,7 @@
   .story-cap p { font-size: 11.5px; }
   .story-cap-icon svg { width: 18px; height: 18px; }
   .pencil-dock { left: 14px; width: 120px; height: 238px; }
-  .pencil-final { left: 74px; --side: 25px; --len: 190px; --tip: 42px; --cap: 15px; --lead: 10px; --tip-tilt: -37deg; }
-  .pencil-final-shadow { left: 74px; top: calc(50% + 110px); width: 126px; }
+  .hero-stage { --final-scale: 0.53; --final-x: 74px; }
   .story-block-3 .story-h2 { font-size: 1.72rem; }
   .story-block-3 .story-lede { font-size: 0.82rem; line-height: 1.45; }
   .story-block-3 .story-cta { font-size: 9px; letter-spacing: 0.1em; gap: 8px; }
@@ -858,15 +844,12 @@
   .pencil-final-shadow {
     display: none;
   }
-  .hero-face {
-    position: absolute;
-    inset: 0;
-    width: auto;
-    height: auto;
+  .hero-panel-bg {
     opacity: 1;
-    transform: none;
-    border-radius: 0;
-    box-shadow: none;
+  }
+  .hero-panel-decor {
+    opacity: 1;
+    transition: none;
   }
   .hero-progress,
   .hero-final-copy {

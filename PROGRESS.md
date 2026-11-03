@@ -251,3 +251,30 @@ Alturas de secção: 1440 **668/827/648** (original idêntico); 1024 **640/817/6
 - Reduced motion e no-JS: face estática, três blocos, sem cartão/CTA final.
 - Wheel/touch/teclado não saltam capítulos; a saída e o cartão final são alcançáveis.
 - Produção em `http://localhost:3100`.
+
+## Revisão 10 — o mesmo lápis, a mesma face
+
+### Modelo
+- Lápis mais largo e curto: `--side` 56, `--len` 400, `--tip` 90, `--cap` 30 (desktop). O corpo deixou de parecer uma vareta.
+- Os três estados de topo/fundo foram fechados: disco de topo do cap, núcleo do cap, núcleo do corpo e núcleo cónico da ponta. O cap é escondido durante o zoom e a saída, por isso o interior nunca aparece no ecrã.
+- A face que se torna painel é a **face frontal do próprio corpo**, colocada atrás das faces normais em repouso. Assim o lápis normal mantém a banda e a estrela; durante o mundo só essa face fica visível.
+
+### Fluxo definitivo
+- `0 → 0.10`: rotação idle em torno do próprio eixo.
+- `0.10 → 0.18`: rotação até à horizontal + crescimento. O `scale` fica baixo durante quase todo o percurso e só dispara no fim, para o lápis ser realmente visto a rodar/crescer antes de o ecrã entrar na face.
+- `0.18`: a face frontal (a mesma do modelo) ocupa o ecrã; painel visível.
+- `0.18 / 0.40 / 0.60`: os três capítulos.
+- `0.76 → 0.90`: saída do mundo. O mesmo lápis reaparece, volta a rodar para a posição final e **diminui** de `scale 28` até `0.65` (desktop) no cartão.
+- `0.90 → 1`: estado final: cartão com o lápis e CTA.
+
+### Câmara
+- O zoom é a escala real do `.pencil-intro`: 0.78 → 28. A face do corpo é a superfície que preenche; não existe um painel-card separado.
+- A rotação idle é pausada quando o mundo começa, para a face escolhida ficar estável durante o zoom.
+- Na saída a mesma escala desce e a posição interpola para o centro do cartão; o cartão aparece por trás.
+
+### Verificação
+- `next build` e consola sem erros.
+- 1440: face a preencher em 0.18; capítulos 1/2/3; saída e cartão final; sem overflow.
+- 390: cartão/CTA finais sem overflow.
+- Reduced motion e no-JS: painel estático, três blocos, decor visível, sem cartão/CTA.
+- Produção em `http://localhost:3100`.

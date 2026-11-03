@@ -16,6 +16,7 @@ export default function Pencil({ className = "" }: { className?: string }) {
       </div>
 
       <div className="pencil-body">
+        <span className="pencil-panel-face" />
         <span className="pencil-body-core" />
 
         {faces.map((face) => (

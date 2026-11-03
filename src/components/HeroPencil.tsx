@@ -133,9 +133,10 @@ export default function HeroPencil() {
           </div>
         </div>
 
-        <div className="hero-face" aria-hidden="true">
-          <span className="hero-face-print">sparkle.do</span>
-          <span className="hero-face-star">✦</span>
+        <div className="hero-panel-bg" aria-hidden="true" />
+        <div className="hero-panel-decor" aria-hidden="true">
+          <span className="hero-panel-print">sparkle.do</span>
+          <span className="hero-panel-star">✦</span>
         </div>
 
         <div className="hero-story">
@@ -210,10 +211,6 @@ export default function HeroPencil() {
         <div className="pencil-dock" aria-hidden="true">
           <span className="pencil-dock-star">✦</span>
           <span className="pencil-dock-caption">sparkle.do</span>
-        </div>
-        <span className="pencil-final-shadow" aria-hidden="true" />
-        <div className="pencil-rig pencil-final" aria-hidden="true">
-          <Pencil />
         </div>
 
         <div className="hero-cue" aria-hidden="true">
