@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
-const FACE_ANGLE = 0;
-const FACE_WIDTH = 0.3;
+const FACE_ANGLE = -Math.PI / 6;
+const ZOOM = 36;
 
 const smooth = (value: number) => value * value * (3 - 2 * value);
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
@@ -131,9 +131,7 @@ export default function HeroPencil3D() {
     root.add(orientation);
     scene.add(root);
 
-    let viewHeight = 6.6;
-    let faceScale = viewHeight / FACE_WIDTH;
-    let turnScale = 1.4;
+    const VIEW_HEIGHT = 6.6;
     let width = 1;
     let height = 1;
     let finalX = 0;
@@ -152,26 +150,21 @@ export default function HeroPencil3D() {
       renderer.setSize(width, height, false);
 
       const aspect = width / height;
-      const viewport = window.innerWidth;
-      viewHeight = viewport < 700 ? 14 : viewport < 1000 ? 9 : 6.6;
-      faceScale = viewHeight / FACE_WIDTH;
-      turnScale = Math.min(1.4, (viewHeight * aspect) / 6.2);
-
-      camera.left = (-viewHeight * aspect) / 2;
-      camera.right = (viewHeight * aspect) / 2;
-      camera.top = viewHeight / 2;
-      camera.bottom = -viewHeight / 2;
+      camera.left = (-VIEW_HEIGHT * aspect) / 2;
+      camera.right = (VIEW_HEIGHT * aspect) / 2;
+      camera.top = VIEW_HEIGHT / 2;
+      camera.bottom = -VIEW_HEIGHT / 2;
       camera.updateProjectionMatrix();
 
       const card = document.querySelector<HTMLElement>(".pencil-dock");
       if (card) {
         const cardRect = card.getBoundingClientRect();
         const centerX = cardRect.left + cardRect.width / 2 - rect.left;
-        const worldPerPixel = viewHeight / height;
+        const worldPerPixel = VIEW_HEIGHT / height;
         finalX = (centerX - width / 2) * worldPerPixel;
         finalScale = Math.max(
           0.18,
-          (cardRect.height * 0.78 * viewHeight) / (modelHeight * height),
+          (cardRect.height * 0.78 * VIEW_HEIGHT) / (modelHeight * height),
         );
       }
     };
@@ -192,6 +185,7 @@ export default function HeroPencil3D() {
       let rz = -26;
       let rx = 6;
       let spin = time * 0.32;
+      let zoom = 1;
       let scale = 1;
       let x = 0;
 
@@ -203,52 +197,57 @@ export default function HeroPencil3D() {
           entrySpin = spinner.rotation.y;
           entryCaptured = true;
         }
-        const turn = smooth(clamp((p - 0.06) / 0.08));
-        const spinGrowth = smooth(clamp((p - 0.06) / 0.16));
-        rz = lerp(-26, -90, turn);
-        rx = lerp(6, 0, turn);
-        spin = entrySpin + (FACE_ANGLE + Math.PI * 2 - entrySpin) * spinGrowth;
-        scale = lerp(1, turnScale, turn);
+        const t = smooth(clamp((p - 0.06) / 0.08));
+        rz = lerp(-26, -90, t);
+        rx = lerp(6, 0, t);
+        spin = entrySpin + (FACE_ANGLE + Math.PI * 2 - entrySpin) * t;
       } else if (p < 0.22) {
-        const growth = smooth(clamp((p - 0.14) / 0.08));
-        const spinGrowth = smooth(clamp((p - 0.06) / 0.16));
+        const t = smooth(clamp((p - 0.14) / 0.08));
         rz = -90;
         rx = 0;
-        spin = entrySpin + (FACE_ANGLE + Math.PI * 2 - entrySpin) * spinGrowth;
-        scale = lerp(turnScale, faceScale, growth);
+        spin = FACE_ANGLE;
+        zoom = lerp(1, ZOOM, t);
       } else if (p < 0.78) {
         rz = -90;
         rx = 0;
         spin = FACE_ANGLE;
-        scale = faceScale;
       } else if (p < 0.9) {
         const e = smooth(clamp((p - 0.78) / 0.12));
         rz = lerp(-90, 0, e);
         rx = 0;
         spin = lerp(FACE_ANGLE, 14, e);
-        const out = smooth(clamp(e / 0.22));
-        scale = e < 0.22
-          ? lerp(faceScale, 1, out)
-          : lerp(1, finalScale, smooth(clamp((e - 0.22) / 0.78)));
+        zoom = lerp(ZOOM, 1, smooth(clamp(e / 0.3)));
+        scale = lerp(1, finalScale, e);
         const xEase = smooth(clamp((e - 0.35) / 0.65));
         x = lerp(0, finalX, xEase);
       } else {
         rz = 0;
         rx = 0;
         spin = 14;
+        zoom = 1;
         scale = finalScale;
         x = finalX;
+      }
+
+      if (p >= 0.22 && p < 0.78) {
+        zoom = ZOOM;
       }
 
       orientation.rotation.set(rx, 0, rz);
       spinner.rotation.y = spin;
       root.position.set(x, 0, 0);
       root.scale.setScalar(scale);
-      panelFace.visible = false;
+      const faceOnly = p >= 0.14 && p < 0.78;
+      panelFace.visible = faceOnly;
       for (const mesh of meshes) {
-        mesh.visible = true;
+        if (mesh !== panelFace) mesh.visible = !faceOnly;
       }
-      camera.zoom = 1;
+      mount.dataset.p = p.toFixed(3);
+      mount.dataset.faceOnly = faceOnly ? "1" : "0";
+      mount.dataset.zoom = zoom.toFixed(2);
+      mount.dataset.rootX = x.toFixed(3);
+      mount.dataset.rootScale = scale.toFixed(3);
+      camera.zoom = zoom;
       camera.updateProjectionMatrix();
       renderer.render(scene, camera);
     };
