@@ -1,14 +1,3 @@
-export type Sample = {
-  id: string;
-  name: string;
-  field: string;
-  word: string;
-  caption: string;
-  cover: string;
-  href: string;
-  phrases: [string, string];
-};
-
 export type Format = {
   id: string;
   eyebrow: string;
@@ -30,49 +19,6 @@ export const site = {
     "O Sparkle.do transforma o seu trabalho em portfólio, cartão de visita pronto para imprimir e cartão compartilhável. Escolha um formato, adicione o seu trabalho e publique.",
   url: "https://sparkle.do",
 };
-
-export const samples: Sample[] = [
-  {
-    id: "photography",
-    name: "Ava Moreau",
-    field: "Fotografia",
-    word: "Sol",
-    caption: "estudo de luz",
-    cover: "/img/covers/face-01.webp",
-    href: "#formats",
-    phrases: ["Automático?", "Crie rápido"],
-  },
-  {
-    id: "design",
-    name: "Jonas Reis",
-    field: "Design",
-    word: "Forma",
-    caption: "em movimento",
-    cover: "/img/covers/face-02.webp",
-    href: "#formats",
-    phrases: ["Dinâmico", "Elegante"],
-  },
-  {
-    id: "development",
-    name: "Lina Silva",
-    field: "Desenvolvimento",
-    word: "Ciclo",
-    caption: "no ar",
-    cover: "/img/covers/face-03.webp",
-    href: "#formats",
-    phrases: ["Portfólio", "Cartão"],
-  },
-  {
-    id: "writing",
-    name: "Noah Ortiz",
-    field: "Escrita",
-    word: "Voz",
-    caption: "em partes",
-    cover: "/img/covers/face-04.webp",
-    href: "#formats",
-    phrases: ["Seu trabalho", "No ar"],
-  },
-];
 
 export const formats: Format[] = [
   {

@@ -1,4 +1,4 @@
-import HeroCube from "../components/HeroCube";
+import HeroPencil from "../components/HeroPencil";
 import FormatTickets from "../components/FormatTickets";
 import FaqFolder from "../components/FaqFolder";
 import HowItWorks from "../components/HowItWorks";
@@ -7,7 +7,7 @@ import WorkGallery from "../components/WorkGallery";
 export default function Home() {
   return (
     <>
-      <HeroCube />
+      <HeroPencil />
       <FormatTickets />
       <FaqFolder />
       <HowItWorks />

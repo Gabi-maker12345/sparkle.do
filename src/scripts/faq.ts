@@ -81,10 +81,7 @@ export function initFaq(): void {
       return;
     }
     const sy = window.scrollY || window.pageYOffset;
-    if (Math.abs(sy - lastScroll) < 0.5) {
-      raf = requestAnimationFrame(frame);
-      return;
-    }
+    if (Math.abs(sy - lastScroll) < 0.5) return;
     lastScroll = sy;
 
     const vh = window.innerHeight;
@@ -98,20 +95,17 @@ export function initFaq(): void {
       } else {
         reset();
       }
-      raf = requestAnimationFrame(frame);
       return;
     }
 
     const source = openFormat();
     if (!source) {
       reset();
-      raf = requestAnimationFrame(frame);
       return;
     }
     const pass = source.querySelector<HTMLElement>("[data-pass]");
     if (!pass) {
       reset();
-      raf = requestAnimationFrame(frame);
       return;
     }
 
@@ -134,7 +128,6 @@ export function initFaq(): void {
     fly.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) perspective(1400px) rotate(${(Math.sin(Math.PI * a) * -6).toFixed(2)}deg) rotateY(${flip.toFixed(1)}deg)`;
 
     card.classList.toggle("on", fade > 0);
-    raf = requestAnimationFrame(frame);
   };
 
   const start = () => {

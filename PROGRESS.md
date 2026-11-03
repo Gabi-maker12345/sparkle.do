@@ -155,3 +155,99 @@ Alturas de secção: 1440 **668/827/648** (original idêntico); 1024 **640/817/6
 
 ### Nota de hidratação
 - O aviso `cz-shortcut-listen="true"` no `<body>` é injetado pela extensão **ColorZilla** antes da hidratação, não pelo código. `suppressHydrationWarning` foi adicionado a `<html>` e `<body>` em `src/app/layout.tsx` para ignorar atributos injetados por extensões; o resto da árvore continua a ser verificado.
+
+## Revisão 6 — novo herói: o lápis
+
+- **Removido** o herói anterior (cubo 3D, tickets de palavras, meta, chips, “Say it”) e todo o código associado: `HeroCube.tsx`, `cube.ts`, `roll.ts`, o ator do CUBE ROLL em `FormatTickets`, os estilos `.roll-*`, os tokens `--cube`/`--ticket-*` e o array `samples`.
+- **Novo herói** (`HeroPencil.tsx` + `Pencil.tsx` + `hero.css` + `pencil.ts`):
+  - Lápis 3D em CSS: prisma hexagonal, ponta em pirâmide, banda e cápsula; paleta da página.
+  - Cartões de portfólio ligeiramente transparentes (obras reais) e emojis a subir/desaparecer no topo.
+  - Scroll de 340vh (300vh mobile) com stage sticky: o lápis cresce e roda até à horizontal; a face do lápis transforma-se no fundo peach de ecrã inteiro.
+  - Revelação da história: “Faça” com estrela luminosa, “o seu portfólio, com brilho.”, explicação e quatro capacidades com ícones SVG (portfólio, cartão, PDF, link).
+  - No fim, o lápis fixa-se à esquerda, ponta para baixo, sobre um cartão-ticket vinho; o conteúdo desloca-se para a direita.
+  - Estados por progresso (`--p`, `--fill`) + classes `is-story` / `is-dock`; `initPencil` com `requestAnimationFrame`, resize e `prefers-reduced-motion`.
+  - Reduced motion e `<noscript>` mostram diretamente o estado final (lápis à esquerda + história).
+- **Responsivo**: nova composição a 1440/1024/390; sem overflow; conteúdo do herói cabe em 100svh no estado final.
+- **Verificação**: `next build` sem erros; consola sem erros; fases testadas (fill/story/dock) a 1440 e 390; reduced motion; capturas em `/tmp` e no browser.
+
+## Revisão 7 — três blocos, transições determinísticas e otimização
+
+### Causa dos bugs
+- O herói anterior usava um único `is-story` em `p >= 0.46` e transições de **0.85s** no contentor e nos filhos. Num scroll rápido, a classe entrava já perto do fim do sticky: o texto ficava a meio da transição, invisível ou semi-transparente; ao voltar atrás, a transição já tinha terminado, parecendo que “só aparecia depois”.
+- O `IntersectionObserver` dos `[data-reveal]` podia perder elementos que entravam e saíam entre frames, deixando secções abaixo com `opacity: 0`.
+- O voo da FAQ mantinha um `requestAnimationFrame` contínuo mesmo sem scroll, consumindo frames em toda a página.
+
+### O que mudou
+- **Três blocos no painel**, com steps explícitos: `.30` (Faça), `.52` (quatro saídas) e `.70` (próximo portfólio + lápis à esquerda). O painel fica opaco em `.30`; cada bloco entra com `is-active` e transição de **0.2s**; os blocos inativos ficam `visibility: hidden`, sem fantasmas.
+- **Controlador do herói** cacheia a altura total no `resize`, usa um único rAF, e só alterna classes (`is-panel`, `is-dock`, `.is-active`); não há transições longas dependentes de thresholds.
+- **Reveals** passaram a ser scroll-driven: um rAF verifica todos os `[data-reveal]` pendentes, revela os que já passaram o limite e remove-os da lista. Nenhum elemento fica preso por ter sido saltado.
+- **FAQ**: o voo deixou de se auto-agendar em permanência; atualiza apenas em scroll/resize. O accordion mantém-se.
+- **Custo do herói**: camadas de abertura (cartões, emojis, lápis, cue) passam a `display: none` quando o painel abre, parando animações infinitas; `will-change` limitado ao lápis; transições de reveal reduzidas de 0.9s para 0.5s.
+- **Lápis lapidado**: corpo mais saturado e facetado, brilho especular, ferragem com relevo, banda com “sparkle.do”, ombro vinho, madeira com grão, ponta grafite em gradiente e topo de borracha elíptico. O estado final **não roda 180°**: a ponta já aponta para baixo. O cartão ganhou estrela e legenda.
+- **Fallbacks**: reduced motion e `<noscript>` mostram os **três blocos em fluxo vertical**, painel estático, sem lápis animado; a página continua legível e sem overflow.
+
+### Verificação
+- `next build` sem erros; consola sem erros.
+- Desktop 1440, tablet 1024 e mobile 390: steps 1/2/3, sem overflow, bloco ativo com `opacity: 1` após 250 ms.
+- Scroll rápido até `.82`: bloco 3 ativo e opaco; sem texto a meio.
+- Todos os `[data-reveal]` ficam `is-in` após percorrer a página.
+- Reduced motion: herói estático com os três blocos; no-JS: os três blocos visíveis.
+- Produção em `http://localhost:3100`.
+
+### Revisão 7.1 — a ponta única
+
+- **Causa da ponta dividida**: as seis faces triangulares usavam `--tip-tilt: -23deg`, mas o ápice só coincide no centro quando `sin(tilt) = -apothem / (tip - 6)`. Com -23° o ápice ficava em `z ≈ 4.6px`; o `rotateY` de cada face transformava esse z em deslocamentos horizontais diferentes, produzindo duas/quatro pontas.
+- A inclinação passou a ser calculada por tamanho: **-26.3°** no herói base, **-27.1°** a 1180, **-25.6°** a 860; no lápis final **-33.3° / -33.7° / -35.8° / -37°**. Assim os seis ápices convergem num único ponto.
+- As faces da ponta ficaram **uniformes** (sem alternância de tons, sem linhas internas) e o grafite passou a ser um gradiente da própria face — sem triângulo separado, sem costura nem ponta flutuante.
+- A banda deixou de mostrar “SPARKLE.D” cortado; agora tem uma estrela centrada. O lápis final ganhou leve `rotateY/rotateZ` para mostrar facetas; o topo do lápis foi arredondado.
+- Verificado em close-up a 1440 e 390: uma única ponta, uma única linha de grafite; `next build` e consola sem erros.
+
+## Revisão 8 — roda, face e scroll com tempo
+
+### Animações
+- **Idle**: o lápis roda em torno do próprio eixo (`pencilIdle`, 12s linear) assim que a hero aparece, antes de qualquer gesto.
+- **Scroll**: o invólucro exterior do lápis roda em Z de `-26°` até `-90°` (horizontal) durante `p = 0 → 0.30`; a rotação própria continua dentro. O lápis fica visível até quase ao fim da expansão e só então se apaga.
+- **Face → painel**: substituí o painel radial por uma **face do lápis** (`--face`) que começa como um retângulo de 46×320 px, atrás do lápis, e cresce até `100vw × 100svh`. O progresso é `ease-in` de `p = 0.12` a `0.30`; assim o lápis gira e fica horizontal antes de a face tomar o ecrã. A face tem borda/raio no início e perde-os no fim; a impressão `sparkle.do` e a estrela aparecem em fade.
+- **Painel**: cada capítulo tem entrada escalonada: eyebrow, título e tagline vêm da esquerda; o lede vem da direita; os quatro cartões de capacidade sobem em stagger; o CTA sobe. O cartão final desliza da esquerda e o lápis cresce. O indicador `01 / 02 / 03` faz fade e muda de capítulo.
+
+### Scroll com velocidade limitada
+- `initHeroScroll` acumula a intenção de roda/touch/teclado e gasta-a a **400 px/s** enquanto a hero está no ecrã. Um flick de 2400 px atravessa os três capítulos em ~5s em vez de saltar tudo.
+- Wheel, trackpad, touch e PageUp/PageDown/setas/espaço são limitados; âncoras (`#formats`, nav) cancelam a animação e o scroll nativo assume. Fora da hero, ou no fim dela, o scroll nativo volta imediatamente.
+- Reduced motion ignora o limitador; a scrollbar nativa continua a ser nativa.
+
+### Verificação
+- `next build` e consola sem erros.
+- Roda de 2400 px: `p` passa por 0.30/0.50/0.72 e ativa os três blocos; rosto/preto; face a 100% em `p=0.30`; conteúdo com `opacity: 1` após as entradas.
+- A 1440, 1024 e 390: painéis 01/02/03 sem overflow; progresso ativo correto.
+- Touch: swipe controlado; o lápis/face avançam sem salto.
+- Reduced motion e no-JS: face estática e três blocos em fluxo; progresso oculto.
+- Âncora de navegação cancela o limitador; no fim da hero a roda volta ao scroll nativo.
+- Produção em `http://localhost:3100`.
+
+## Revisão 9 — o mundo do lápis
+
+### Fluxo definitivo
+- Hero com **420vh** desktop / **390vh** tablet / **380vh** mobile.
+- `0 → 0.12`: idle, a rodar sobre o próprio eixo.
+- `0.12 → 0.30`: o lápis roda até à horizontal (`rotateZ -90°`), cresce até **~3×** e desloca-se para a esquerda enquanto a face peach cresce.
+- `0.30`: a face está em `100vw × 100svh`; o painel está pronto.
+- `0.32 / 0.48 / 0.62`: os três capítulos (`Faça`, `Quatro saídas`, `O próximo portfólio`).
+- `0.76 → 0.90`: saída do mundo. O painel/face encolhe e faz fade, a história desaparece, o lápis final aparece grande e **diminui** até ao cartão.
+- `0.90 → 1`: estado final limpo — cartão com o lápis à esquerda e CTA “Ver formatos” à direita.
+
+### Correções do modelo
+- O topo do lápis deixou de ser um tubo vazado: o cap tem disco de topo, núcleo interno e corpo com núcleo; o topo já não mostra o fundo da página.
+- O fundo do corpo e a ponta mantêm o núcleo de madeira; o topo do cap é um disco peach fechado.
+- O lápis desloca-se lateralmente durante o zoom para que a transição entre o corpo e a face não exponha o interior do topo.
+
+### Scroll
+- O controlador limita roda/trackpad/touch/teclado a **430 px/s**; âncoras cancelam a animação; fora da hero o scroll nativo volta.
+- O estado final é independente do comprimento do scroll: a hero termina depois do CTA.
+
+### Verificação
+- `next build` e consola sem erros.
+- Cenas testadas por scroll direto: 0.18, 0.27, 0.40, 0.70, 0.80, 0.86, 0.95.
+- 1440 e 390: painéis 1/2/3, saída, cartão final; sem overflow.
+- Reduced motion e no-JS: face estática, três blocos, sem cartão/CTA final.
+- Wheel/touch/teclado não saltam capítulos; a saída e o cartão final são alcançáveis.
+- Produção em `http://localhost:3100`.

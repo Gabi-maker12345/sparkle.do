@@ -55,32 +55,6 @@ export default function FormatTickets() {
         ))}
       </ul>
 
-      <div className="roll-actor" data-roll="" aria-hidden="true">
-        <div className="roll-card" data-roll-card="">
-          <div className="roll-eyebrow">
-            <span>Passe de embarque ·</span>
-            <span data-roll-eyebrow="">Kit completo</span>
-          </div>
-          <div className="roll-code">
-            <span>EU</span>
-            <span data-roll-to="">TUDO</span>
-          </div>
-          <div className="roll-title" data-roll-title="">
-            O kit completo
-          </div>
-          <div className="roll-features">
-            <span>
-              <b>Incluído</b>Site + cartão
-            </span>
-            <span>
-              <b>Mais</b>PDF impresso
-            </span>
-            <span>
-              <b>E</b>Domínio próprio
-            </span>
-          </div>
-        </div>
-      </div>
     </section>
   );
 }

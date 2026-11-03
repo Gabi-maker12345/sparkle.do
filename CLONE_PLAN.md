@@ -1,6 +1,8 @@
 # CLONE_PLAN — Plano de implementação (Sparkle.do)
 
 > **Nota de migração (2026-11-03):** a implementação foi migrada de Astro para **Next.js 16 (App Router, React 19)**. A stack e as pastas em §1–§2 são o plano original; a estrutura atual está em `src/app`, `src/components/*.tsx` e `PROGRESS.md` (Revisão 5).
+>
+> **Nota de redesign (2026-11-03):** o herói clonado foi substituído por um conceito original — lápis 3D, transição scroll-driven e história “Faça” — descrito na Revisão 6 de `PROGRESS.md`. As secções 2–5 mantêm a base. O CUBE ROLL foi removido com o cubo.
 
 Base: `CLONE_SPEC.md`. Alvo: landing de 3 secções (herói 3D, passes de formato, FAQ em pasta), com a identidade Sparkle.do e conteúdo do produto. Sem footer. Sem backend de geração nesta fase.
 

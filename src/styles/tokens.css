@@ -77,11 +77,6 @@
   --soft: cubic-bezier(0.3, 0.7, 0.4, 1);
 
   /* hero */
-  --cube: clamp(270px, 28vw, 500px);
-  --cube-center: 400px;
-  --cube-rest: 22deg;
-  --ticket-w: 274px;
-  --ticket-h: 133px;
 
   /* section 2 */
   --text-w: clamp(320px, 27vw, 520px);

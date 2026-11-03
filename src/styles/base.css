@@ -91,8 +91,8 @@ html.js [data-reveal] {
   opacity: 0;
   transform: translateY(20px);
   transition:
-    opacity 0.9s var(--spring),
-    transform 0.9s var(--spring);
+    opacity 0.5s var(--spring),
+    transform 0.5s var(--spring);
   transition-delay: var(--d, 0ms);
 }
 
