@@ -310,3 +310,32 @@ Alturas de secção: 1440 **668/827/648** (original idêntico); 1024 **640/817/6
 - 390: painel e cartão/pencil finais sem overflow; cartão centrado.
 - Reduced motion e no-JS: painel estático e três blocos, sem canvas.
 - Produção em `http://localhost:3100`.
+
+## Revisão 12 — rotação própria e câmara estável
+
+### Rotação
+- O lápis foi dividido em três grupos: `root` (posição/escala), `orientation` (inclinação e virada para horizontal) e `spinner` (eixo longitudinal).
+- O idle roda apenas `spinner.rotation.y`; a inclinação fica fixa no `orientation`. O lápis gira **em torno de si mesmo**, como a Terra, sem orbitar nem precessar.
+- Ao entrar no mundo, o spinner pára no ângulo de uma face; a inclinação vai a `-90°`; a câmara aproxima-se.
+
+### Scroll
+- As fases deixaram de misturar idle + virada + zoom no mesmo Euler:
+  - `0 → 0.06` idle;
+  - `0.06 → 0.14` vira para horizontal;
+  - `0.14 → 0.22` câmara entra na face;
+  - `0.22 / 0.42 / 0.62` capítulos;
+  - `0.78 → 0.90` saída: a câmara afasta-se, o mesmo lápis reaparece e roda para a posição final enquanto diminui;
+  - `0.90 → 1` cartão final.
+- Durante a face, só a superfície do lápis fica visível; o corpo não aparece como fatias/wedges.
+- O cartão e o CTA final só aparecem no fim da saída, quando o lápis já está na posição vertical.
+
+### Modelo
+- Corpo ligeiramente mais fino e comprido; borracha arredondada; ferragem/banda; ponta em tronco de cone; grafite cónico. Tudo fechado no Three.js.
+- O cartão mobile foi alinhado pelo centro (`--final-x`), sem corte lateral.
+
+### Verificação
+- `next build` e consola sem erros.
+- Idle: duas capturas em tempos diferentes mantêm o eixo fixo; as facetas rodam.
+- 1440 e 390: face/painel, capítulos, saída, cartão final; sem overflow.
+- Reduced motion e no-JS: painel estático, três blocos, sem canvas.
+- Produção em `http://localhost:3100`.

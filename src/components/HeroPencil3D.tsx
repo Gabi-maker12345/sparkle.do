@@ -10,7 +10,7 @@ const smooth = (value: number) => value * value * (3 - 2 * value);
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const lerp = (from: number, to: number, t: number) => from + (to - from) * t;
 
-function makePencil(): { group: THREE.Group; height: number; panelFace: THREE.Mesh } {
+function makePencil(): { group: THREE.Group; height: number; panelFace: THREE.Mesh; meshes: THREE.Mesh[] } {
   const group = new THREE.Group();
 
   const bodyMaterial = new THREE.MeshStandardMaterial({
@@ -86,7 +86,7 @@ function makePencil(): { group: THREE.Group; height: number; panelFace: THREE.Me
   group.add(graphite);
 
   const panelFace = new THREE.Mesh(
-    new THREE.PlaneGeometry(radius * 1.15, bodyLength),
+    new THREE.PlaneGeometry(radius * 2.4, bodyLength),
     new THREE.MeshBasicMaterial({ color: 0xf0c8bb }),
   );
   panelFace.position.set(0, 0, radius + 0.012);
@@ -95,7 +95,8 @@ function makePencil(): { group: THREE.Group; height: number; panelFace: THREE.Me
 
   const box = new THREE.Box3().setFromObject(group);
   const height = Math.max(0.01, box.max.y - box.min.y);
-  return { group, height, panelFace };
+  const meshes = group.children.filter((child): child is THREE.Mesh => child instanceof THREE.Mesh);
+  return { group, height, panelFace, meshes };
 }
 
 export default function HeroPencil3D() {
@@ -123,8 +124,12 @@ export default function HeroPencil3D() {
     fill.position.set(-5, 1.5, 3);
     scene.add(fill);
 
-    const { group, height: modelHeight, panelFace } = makePencil();
-    scene.add(group);
+    const { group: spinner, height: modelHeight, panelFace, meshes } = makePencil();
+    const orientation = new THREE.Group();
+    const root = new THREE.Group();
+    orientation.add(spinner);
+    root.add(orientation);
+    scene.add(root);
 
     const VIEW_HEIGHT = 6.6;
     let width = 1;
@@ -134,6 +139,8 @@ export default function HeroPencil3D() {
     let p = 0;
     let raf = 0;
     let last = 0;
+    let entrySpin = 0;
+    let entryCaptured = false;
     const started = performance.now();
 
     const measure = () => {
@@ -176,45 +183,67 @@ export default function HeroPencil3D() {
       const time = (now - started) / 1000;
 
       let rz = -26;
-      let ry = FACE_ANGLE + 0.7;
+      let rx = 6;
+      let spin = time * 0.32;
       let zoom = 1;
       let scale = 1;
       let x = 0;
 
       if (p < 0.06) {
-        ry = FACE_ANGLE + 0.7 + time * 0.32;
+        entryCaptured = false;
+        spin = time * 0.32;
       } else if (p < 0.14) {
+        if (!entryCaptured) {
+          entrySpin = spinner.rotation.y;
+          entryCaptured = true;
+        }
         const t = smooth(clamp((p - 0.06) / 0.08));
         rz = lerp(-26, -90, t);
-        ry = lerp(FACE_ANGLE + 0.7, FACE_ANGLE, t);
+        rx = lerp(6, 0, t);
+        spin = lerp(entrySpin, FACE_ANGLE, t);
       } else if (p < 0.22) {
         const t = smooth(clamp((p - 0.14) / 0.08));
         rz = -90;
-        ry = FACE_ANGLE;
+        rx = 0;
+        spin = FACE_ANGLE;
         zoom = lerp(1, ZOOM, t);
       } else if (p < 0.78) {
         rz = -90;
-        ry = FACE_ANGLE;
+        rx = 0;
+        spin = FACE_ANGLE;
         zoom = ZOOM;
       } else if (p < 0.9) {
         const e = smooth(clamp((p - 0.78) / 0.12));
         rz = lerp(-90, 0, e);
-        ry = lerp(FACE_ANGLE, 14, e);
-        zoom = lerp(ZOOM, 1, e);
+        rx = 0;
+        spin = lerp(FACE_ANGLE, 14, e);
+        zoom = lerp(ZOOM, 1, smooth(clamp(e / 0.3)));
         scale = lerp(1, finalScale, e);
-        x = lerp(0, finalX, e);
+        const xEase = smooth(clamp((e - 0.35) / 0.65));
+        x = lerp(0, finalX, xEase);
       } else {
         rz = 0;
-        ry = 14;
+        rx = 0;
+        spin = 14;
         zoom = 1;
         scale = finalScale;
         x = finalX;
       }
 
-      group.rotation.set(0, ry, rz);
-      group.position.set(x, 0, 0);
-      group.scale.setScalar(scale);
-      panelFace.visible = p >= 0.14 && p < 0.78;
+      orientation.rotation.set(rx, 0, rz);
+      spinner.rotation.y = spin;
+      root.position.set(x, 0, 0);
+      root.scale.setScalar(scale);
+      const faceOnly = p >= 0.14 && p < 0.78;
+      panelFace.visible = faceOnly;
+      for (const mesh of meshes) {
+        if (mesh !== panelFace) mesh.visible = !faceOnly;
+      }
+      mount.dataset.p = p.toFixed(3);
+      mount.dataset.faceOnly = faceOnly ? "1" : "0";
+      mount.dataset.zoom = zoom.toFixed(2);
+      mount.dataset.rootX = x.toFixed(3);
+      mount.dataset.rootScale = scale.toFixed(3);
       camera.zoom = zoom;
       camera.updateProjectionMatrix();
       renderer.render(scene, camera);

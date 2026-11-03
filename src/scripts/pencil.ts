@@ -55,7 +55,8 @@ export function initPencil(): void {
     const step = p >= 0.62 ? 3 : p >= 0.42 ? 2 : p >= 0.22 ? 1 : 0;
     const chapters = step > 0 && p < 0.78;
 
-    hero.classList.toggle("is-panel", p >= 0.22);
+    hero.classList.toggle("is-panel", p >= 0.14);
+    hero.classList.toggle("is-face", p >= 0.14 && p < 0.78);
     hero.classList.toggle("is-world", p >= 0.22 && p < 0.78);
     hero.classList.toggle("is-chapters", chapters);
     hero.classList.toggle("is-exit", p >= 0.78);

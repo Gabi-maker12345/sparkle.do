@@ -106,7 +106,7 @@
   width: 100%;
   height: 100%;
 }
-.hero.is-world .hero-panel-bg {
+.hero.is-face .hero-panel-bg {
   opacity: 1;
 }
 
@@ -628,7 +628,7 @@
   box-shadow:
     0 34px 70px rgba(48, 10, 20, 0.26),
     0 1px 0 rgba(255, 255, 255, 0.25) inset;
-  opacity: clamp(0, calc((var(--exit) - 0.32) * 2.6), 1);
+  opacity: clamp(0, calc((var(--exit) - 0.8) * 5), 1);
   visibility: hidden;
 }
 .hero.is-exit .pencil-dock { visibility: visible; }
@@ -671,7 +671,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 18px;
-  opacity: clamp(0, calc((var(--exit) - 0.55) * 3.2), 1);
+  opacity: clamp(0, calc((var(--exit) - 0.8) * 5), 1);
   transform: translateY(calc(-50% + (1 - var(--exit)) * 18px));
   visibility: hidden;
   pointer-events: none;
