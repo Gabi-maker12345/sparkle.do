@@ -1,0 +1,588 @@
+/* ---------- section 2: formats ---------- */
+
+.formats {
+  position: relative;
+  padding: calc(28px + var(--split-size) + 35px) 3vw 26px;
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.formats-title {
+  position: absolute;
+  top: 28px;
+  left: 3vw;
+  right: 3vw;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 40px;
+  pointer-events: none;
+}
+
+.formats-title h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 40px;
+  width: 100%;
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--split-size);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--wine);
+  white-space: nowrap;
+}
+
+.formats-title h2 span:last-child {
+  text-align: right;
+}
+
+.formats-list {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 22px;
+  width: 100%;
+  height: var(--row-h);
+  max-width: 1640px;
+  margin: 0 auto;
+  padding: 0 14px 14px 0;
+  list-style: none;
+}
+
+.format {
+  position: relative;
+  display: block;
+  flex: 0 0 var(--card-w);
+  min-width: 0;
+  transition: flex 0.6s var(--spring);
+}
+
+.formats-list:hover .format {
+  flex: 0 0 var(--card-w);
+}
+
+.formats-list:hover .format:hover,
+.formats-list:not(:hover) .format:last-child {
+  flex: 1 1 var(--card-w);
+}
+
+.format-media {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  background: var(--deep);
+  box-shadow:
+    0 2px 4px hsla(340, 59%, 14%, 0.16),
+    0 16.2px 36px -12.6px hsla(340, 59%, 14%, 0.55);
+  transition: left 0.6s var(--spring);
+}
+
+.format-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 26%;
+  filter: grayscale(1) contrast(1.05);
+  transition: filter 0.5s ease;
+}
+
+.formats-list:not(:hover) .format:last-child .format-media img,
+.formats-list:hover .format:hover .format-media img {
+  filter: none;
+}
+
+.format-media::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--wine);
+  mix-blend-mode: multiply;
+  opacity: 0.35;
+  transition: opacity 0.6s ease;
+}
+
+.formats-list:hover .format:last-child:not(:hover) .format-media,
+.formats-list:not(:hover) .format:not(:last-child) .format-media {
+  left: 0;
+}
+
+.formats-list:not(:hover) .format:last-child .format-media,
+.formats-list:hover .format:hover .format-media {
+  left: var(--text-w);
+}
+
+.formats-list:not(:hover) .format:last-child .format-media::before,
+.formats-list:hover .format:hover .format-media::before {
+  opacity: 0;
+}
+
+.format-vertical {
+  position: absolute;
+  bottom: 22px;
+  left: 18px;
+  z-index: 2;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-display);
+  font-size: 13.12px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--paper);
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.formats-list:not(:hover) .format:last-child .format-vertical,
+.formats-list:hover .format:hover .format-vertical {
+  opacity: 0;
+}
+
+/* ---------- the boarding pass ---------- */
+
+.format-pass {
+  position: absolute;
+  left: 0;
+  top: var(--drop);
+  z-index: 2;
+  width: var(--stub-w);
+  height: calc(100% - var(--drop));
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease 0.35s, visibility 0s linear 0.65s;
+  color: var(--paper);
+}
+
+.formats-list:not(:hover) .format:last-child .format-pass,
+.formats-list:hover .format:hover .format-pass {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease 0.35s;
+}
+
+.format-pass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 56px;
+  background: linear-gradient(var(--peach) 72px, var(--wine) 0);
+}
+
+.format-pass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  border-radius: 56px;
+  background: var(--deep);
+  transform: translate(7px, 9px);
+}
+
+.pass-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.pass-eyebrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  height: 72px;
+  margin-bottom: 26px;
+  padding: 0 38px;
+  color: var(--wine);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pass-code {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0;
+  flex: 1 1 auto;
+  padding: 6px 38px;
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 60.48px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pass-code::before {
+  content: "";
+  grid-column: 2;
+  grid-row: 1;
+  height: 0.5em;
+  margin: 0 0.5em;
+  border-bottom: 2px dotted hsla(38, 100%, 98%, 0.5);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath transform='rotate(90 12 12)' fill='%23FFFBF4' d='M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z'/%3E%3C/svg%3E")
+    center top / 0.32em no-repeat;
+}
+
+.pass-code span:first-child {
+  grid-column: 1;
+}
+
+.pass-code span:last-child {
+  grid-column: 3;
+}
+
+.pass-title {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 4px 38px 14px;
+  border-top: 1px solid hsla(38, 100%, 98%, 0.3);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 25.6px;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--paper);
+}
+
+.pass-features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  flex: 0 0 96px;
+}
+
+.pass-feature {
+  margin: 0;
+  padding: 8px 6px 20px 38px;
+  border-right: 1px solid hsla(38, 100%, 98%, 0.3);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 11.84px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.pass-feature:nth-child(2) {
+  padding-left: 14px;
+}
+
+.pass-feature:nth-child(3) {
+  padding-left: 14px;
+  border-right: 0;
+}
+
+.pass-feature::before {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--peach);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+
+.pass-feature:nth-child(1)::before {
+  content: "Incluído";
+}
+.pass-feature:nth-child(2)::before {
+  content: "Mais";
+}
+.pass-feature:nth-child(3)::before {
+  content: "E";
+}
+
+.format-greeting {
+  position: absolute;
+  left: calc(var(--text-w) + 22px);
+  top: 22px;
+  z-index: 3;
+  margin: 0;
+  padding: 11px 20px;
+  background: var(--paper);
+  color: var(--wine);
+  font-family: var(--font-display);
+  font-size: 25.6px;
+  line-height: 1;
+  white-space: nowrap;
+  outline: 1.5px solid var(--deep);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.formats-list:not(:hover) .format:last-child .format-greeting,
+.formats-list:hover .format:hover .format-greeting {
+  opacity: 1;
+}
+
+/* ---------- the travelling pass (roll) ---------- */
+
+.roll-actor {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  perspective: 1700px;
+  pointer-events: none;
+  display: none;
+}
+
+.roll-card {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 365px;
+  height: 476px;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  border-radius: 56px;
+  background: linear-gradient(var(--peach) 72px, var(--wine) 0);
+  box-shadow:
+    0 0 0 2.5px var(--deep),
+    7px 9px 0 2.5px var(--deep),
+    0 30px 60px -30px hsla(340, 59%, 14%, 0.6);
+  color: var(--paper);
+  overflow: hidden;
+}
+
+.roll-card .roll-eyebrow {
+  display: flex;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0 34px;
+  align-items: center;
+  color: var(--wine);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.roll-card .roll-code {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 38px;
+  font-family: var(--font-display);
+  font-size: 60.48px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.roll-card .roll-title {
+  padding: 12px 38px 0;
+  font-family: var(--font-display);
+  font-size: 25.6px;
+  line-height: 1.1;
+}
+
+.roll-card .roll-features {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  height: 96px;
+}
+
+.roll-card .roll-features span {
+  display: block;
+  padding: 8px 6px 20px 38px;
+  border-right: 1px solid hsla(38, 100%, 98%, 0.3);
+  color: var(--paper);
+  font-family: var(--font-display);
+  font-size: 11.84px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.roll-card .roll-features span:nth-child(2) {
+  padding-left: 14px;
+}
+
+.roll-card .roll-features span:nth-child(3) {
+  padding-left: 14px;
+  border-right: 0;
+}
+
+.roll-card .roll-features b {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--peach);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+/* ---------- mobile: a strip of passes ---------- */
+
+@media (max-width: 1023px) {
+  .formats {
+    padding: 32px 0 8px;
+  }
+
+  .formats-title {
+    position: static;
+    display: block;
+    padding: 0 3vw;
+    margin-bottom: 18px;
+  }
+
+  .formats-title h2 {
+    display: block;
+    font-size: clamp(2.3rem, 9vw, 3.2rem);
+    line-height: 1;
+    white-space: normal;
+  }
+
+  .formats-title h2 span {
+    display: block;
+  }
+
+  .formats-title h2 span:last-child {
+    text-align: left;
+  }
+
+  .formats-list {
+    height: auto;
+    display: flex;
+    gap: 10px;
+    margin: 0 -6vw;
+    padding: 4px calc((100vw - 326px) / 2) 20px;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    perspective: 900px;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .formats-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .formats-list:not(:hover) .format:last-child,
+  .formats-list:hover .format:hover,
+  .format {
+    flex: 0 0 326px;
+    min-height: 484px;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    background: var(--wine);
+    border-radius: 14px;
+    outline: 1.5px solid var(--deep);
+    box-shadow:
+      0 2px 4px hsla(340, 59%, 14%, 0.16),
+      0 12px 24px -12px hsla(340, 59%, 14%, 0.5);
+    scroll-snap-align: center;
+    overflow: hidden;
+  }
+
+  .format-media {
+    position: relative;
+    inset: auto;
+    flex: 0 0 210px;
+    left: 0 !important;
+    box-shadow: none;
+    transition: none;
+  }
+
+  .format-media::before {
+    opacity: 0.2;
+  }
+
+  .format-vertical {
+    display: none;
+  }
+
+  .format-pass {
+    position: relative;
+    top: auto;
+    width: auto;
+    height: auto;
+    flex: 1 1 auto;
+    padding: 18px 20px 22px;
+    opacity: 1;
+    visibility: visible;
+    color: var(--paper);
+    transition: none;
+  }
+
+  .format-pass::before,
+  .format-pass::after {
+    display: none;
+  }
+
+  .pass-inner {
+    display: block;
+    height: auto;
+  }
+
+  .pass-eyebrow {
+    height: auto;
+    margin-bottom: 10px;
+    padding: 0;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    color: var(--peach);
+  }
+
+  .pass-code {
+    display: grid;
+    padding: 0;
+    font-size: 38px;
+  }
+
+  .pass-code::before {
+    height: 0.4em;
+    margin: 0 0.4em;
+    background-size: 0.3em;
+  }
+
+  .pass-title {
+    padding: 10px 0 12px;
+    font-size: 22px;
+  }
+
+  .pass-features {
+    flex: none;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .pass-feature {
+    padding: 6px 8px 6px 0;
+    font-size: 10px;
+  }
+
+  .pass-feature:nth-child(2),
+  .pass-feature:nth-child(3) {
+    padding-left: 8px;
+  }
+
+  .pass-feature::before {
+    font-size: 9px;
+  }
+
+  .format-greeting {
+    display: none;
+  }
+}
