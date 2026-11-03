@@ -1,7 +1,7 @@
 /* Hero — a pencil draws a portfolio. */
 .hero {
   position: relative;
-  height: 420vh;
+  height: 600vh;
   background: var(--paper);
   color: var(--wine);
 }
@@ -796,7 +796,7 @@
 }
 
 @media (max-width: 860px) {
-  .hero { height: 390vh; }
+  .hero { height: 570vh; }
   .hero-stage { --final-scale: 0.55; --final-x: 83px; }
   .pencil-rig { --side: 40px; --len: 340px; --tip: 76px; --cap: 25px; --lead: 16px; --tip-tilt: -29.7deg; }
   .pencil-shadow { top: calc(48% + 200px); }
@@ -813,7 +813,7 @@
 }
 
 @media (max-width: 520px) {
-  .hero { height: 380vh; }
+  .hero { height: 560vh; }
   .hero-kicker { font-size: 9px; letter-spacing: 0.1em; }
   .hero-story { padding-inline: 22px; }
   .hero-story-inner { min-height: 480px; }

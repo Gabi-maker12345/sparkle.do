@@ -170,6 +170,9 @@ export default function HeroPencil3D() {
     let width = 1;
     let height = 1;
     let viewHeight = VIEW_HEIGHT_MIN;
+    let heroTop = 0;
+    let animationSpan = 1;
+    let chapterSpan = 1;
     let ps = 0;
     let forcedP: number | null = null;
     let faceColor: string | null = null;
@@ -179,8 +182,12 @@ export default function HeroPencil3D() {
 
     const rawP = () => {
       if (!hero) return 0;
-      const total = Math.max(1, hero.offsetHeight - window.innerHeight);
-      return clamp01(-hero.getBoundingClientRect().top / total);
+      return clamp01((window.scrollY - heroTop) / animationSpan);
+    };
+
+    const rawChapter = () => {
+      if (!hero) return 0;
+      return clamp01((window.scrollY - heroTop - animationSpan) / chapterSpan);
     };
 
     const measure = () => {
@@ -188,6 +195,16 @@ export default function HeroPencil3D() {
       width = Math.max(1, rect.width);
       height = Math.max(1, rect.height);
       renderer.setSize(width, height, false);
+
+      if (hero) {
+        heroTop = hero.getBoundingClientRect().top + window.scrollY;
+        const baseVH = window.innerWidth <= 520 ? 380 : window.innerWidth <= 860 ? 390 : 420;
+        animationSpan = Math.max(1, ((baseVH - 100) * window.innerHeight) / 100);
+        chapterSpan = Math.max(
+          1,
+          hero.offsetHeight - window.innerHeight - animationSpan,
+        );
+      }
 
       const aspect = width / height;
       viewHeight = Math.max(VIEW_HEIGHT_MIN, VIEW_WIDTH_FIT / Math.max(0.1, aspect));
@@ -236,6 +253,8 @@ export default function HeroPencil3D() {
 
       const eC = smoother(seg(ps, 0.88, 0.98));
       const chapters = eC > 0.0001;
+      const chapter = rawChapter();
+      const step = chapter < 1 / 3 ? 0 : chapter < 2 / 3 ? 1 : 2;
       if (panel) {
         panel.style.transition = "none";
         panel.style.opacity = String(eC);
@@ -249,10 +268,12 @@ export default function HeroPencil3D() {
       }
       if (hero) {
         hero.classList.toggle("is-chapters", chapters);
-        hero.classList.toggle("is-step-1", chapters);
+        hero.classList.toggle("is-step-1", chapters && step === 0);
+        hero.classList.toggle("is-step-2", chapters && step === 1);
+        hero.classList.toggle("is-step-3", chapters && step === 2);
       }
       blocks.forEach((block, index) => {
-        block.classList.toggle("is-active", index === 0 && chapters);
+        block.classList.toggle("is-active", chapters && index === step);
       });
 
       const hidden = ps >= 0.995;
@@ -295,6 +316,7 @@ export default function HeroPencil3D() {
       m,
       pose: (p: number, rs = 0.3) => rig.pose(p, rs, Math.ceil((rs + Math.PI * 3 + measured.faceTheta) / ((Math.PI * 2) / measured.nSides)) * ((Math.PI * 2) / measured.nSides) - measured.faceTheta),
       getP: () => ps,
+      getChapter: () => rawChapter(),
       getFaceColor: () => faceColor,
       meshCount: pencil.meshes.length,
     };
