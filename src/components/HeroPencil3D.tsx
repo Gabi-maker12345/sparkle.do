@@ -2,15 +2,18 @@
 
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { clamp01, createPencilRig, measureBody, seg, smoother } from "../../pencil-rig.js";
 
-const FACE_ANGLE = -Math.PI / 6;
-const ZOOM = 36;
+const CAMERA_DISTANCE = 10;
+const VIEW_HEIGHT_MIN = 6.6;
+const VIEW_WIDTH_FIT = 5.5;
 
-const smooth = (value: number) => value * value * (3 - 2 * value);
-const clamp = (value: number) => Math.max(0, Math.min(1, value));
-const lerp = (from: number, to: number, t: number) => from + (to - from) * t;
-
-function makePencil(): { group: THREE.Group; height: number; panelFace: THREE.Mesh; meshes: THREE.Mesh[] } {
+function makePencil(): {
+  group: THREE.Group;
+  body: THREE.Mesh;
+  band: THREE.Mesh;
+  meshes: THREE.Mesh[];
+} {
   const group = new THREE.Group();
 
   const bodyMaterial = new THREE.MeshStandardMaterial({
@@ -47,12 +50,14 @@ function makePencil(): { group: THREE.Group; height: number; panelFace: THREE.Me
     new THREE.CylinderGeometry(radius, radius, bodyLength, 6, 1, false),
     bodyMaterial,
   );
+  body.name = "pencil-body";
   group.add(body);
 
   const band = new THREE.Mesh(
     new THREE.CylinderGeometry(radius * 1.02, radius * 1.02, 0.26, 6, 1, false),
     wineMaterial,
   );
+  band.name = "pencil-band";
   band.position.y = 1.9;
   group.add(band);
 
@@ -60,6 +65,7 @@ function makePencil(): { group: THREE.Group; height: number; panelFace: THREE.Me
     new THREE.CylinderGeometry(radius * 1.04, radius * 1.04, 0.18, 6, 1, false),
     wineMaterial,
   );
+  ferrule.name = "pencil-ferrule";
   ferrule.position.y = bodyLength / 2 + 0.09;
   group.add(ferrule);
 
@@ -67,6 +73,7 @@ function makePencil(): { group: THREE.Group; height: number; panelFace: THREE.Me
     new THREE.SphereGeometry(radius * 0.94, 18, 12),
     capMaterial,
   );
+  eraser.name = "pencil-eraser";
   eraser.scale.y = 0.55;
   eraser.position.y = bodyLength / 2 + 0.3;
   group.add(eraser);
@@ -75,6 +82,7 @@ function makePencil(): { group: THREE.Group; height: number; panelFace: THREE.Me
     new THREE.CylinderGeometry(radius, 0.1, 0.7, 6, 1, false),
     woodMaterial,
   );
+  wood.name = "pencil-wood";
   wood.position.y = -bodyLength / 2 - 0.35;
   group.add(wood);
 
@@ -82,21 +90,14 @@ function makePencil(): { group: THREE.Group; height: number; panelFace: THREE.Me
     new THREE.CylinderGeometry(0.1, 0.001, 0.2, 6, 1, false),
     graphiteMaterial,
   );
+  graphite.name = "pencil-graphite";
   graphite.position.y = -bodyLength / 2 - 0.7 - 0.1;
   group.add(graphite);
 
-  const panelFace = new THREE.Mesh(
-    new THREE.PlaneGeometry(radius * 2.4, bodyLength),
-    new THREE.MeshBasicMaterial({ color: 0xf0c8bb }),
+  const meshes = group.children.filter(
+    (child): child is THREE.Mesh => child instanceof THREE.Mesh,
   );
-  panelFace.position.set(0, 0, radius + 0.012);
-  panelFace.visible = false;
-  group.add(panelFace);
-
-  const box = new THREE.Box3().setFromObject(group);
-  const height = Math.max(0.01, box.max.y - box.min.y);
-  const meshes = group.children.filter((child): child is THREE.Mesh => child instanceof THREE.Mesh);
-  return { group, height, panelFace, meshes };
+  return { group, body, band, meshes };
 }
 
 export default function HeroPencil3D() {
@@ -106,14 +107,27 @@ export default function HeroPencil3D() {
     const mount = mountRef.current;
     if (!mount) return;
 
+    const hero = mount.closest<HTMLElement>("[data-hero-pencil]") ?? document.querySelector<HTMLElement>("[data-hero-pencil]");
+    const panel = hero?.querySelector<HTMLElement>(".hero-story") ?? null;
+    const panelBg = hero?.querySelector<HTMLElement>(".hero-panel-bg") ?? null;
+    const panelDecor = hero?.querySelector<HTMLElement>(".hero-panel-decor") ?? null;
+    const blocks = Array.from(hero?.querySelectorAll<HTMLElement>("[data-story-block]") ?? []);
+    const decorNodes = [
+      hero?.querySelector<HTMLElement>(".hero-float"),
+      hero?.querySelector<HTMLElement>(".hero-emojis"),
+      hero?.querySelector<HTMLElement>(".hero-kicker"),
+      hero?.querySelector<HTMLElement>(".hero-cue"),
+      hero?.querySelector<HTMLElement>(".pencil-shadow"),
+    ].filter((node): node is HTMLElement => Boolean(node));
+
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     mount.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 40);
-    camera.position.set(0, 0, 10);
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.05, 500);
+    camera.position.set(0, 0, CAMERA_DISTANCE);
     camera.lookAt(0, 0, 0);
 
     scene.add(new THREE.AmbientLight(0xfff6ef, 1.35));
@@ -124,24 +138,50 @@ export default function HeroPencil3D() {
     fill.position.set(-5, 1.5, 3);
     scene.add(fill);
 
-    const { group: spinner, height: modelHeight, panelFace, meshes } = makePencil();
-    const orientation = new THREE.Group();
-    const root = new THREE.Group();
-    orientation.add(spinner);
-    root.add(orientation);
-    scene.add(root);
+    const pencil = makePencil();
+    const pencilRig = new THREE.Group();
+    pencilRig.add(pencil.group);
+    scene.add(pencilRig);
 
-    const VIEW_HEIGHT = 6.6;
+    pencil.group.traverse((object) => {
+      if (object instanceof THREE.Mesh) object.frustumCulled = false;
+    });
+
+    pencil.group.updateWorldMatrix(true, true);
+    const measured = measureBody(pencil.group, pencil.body);
+    const bandGeometry = pencil.band.geometry as THREE.CylinderGeometry;
+    const bandHeight = Number(bandGeometry.parameters?.height ?? 0.26);
+    const smoothTop = pencil.band.position.y - bandHeight / 2;
+    const smoothBottom = measured.yMin;
+    const faceLen = Math.max(0.1, smoothTop - smoothBottom);
+    const yFaceMid = (smoothTop + smoothBottom) / 2;
+
+    const m = {
+      nSides: measured.nSides,
+      R: measured.R,
+      faceTheta: measured.faceTheta,
+      yFaceMid,
+      faceLen,
+      heroScale: 1,
+      heroPos: new THREE.Vector3(0, 0, 0),
+    };
+    const rig = createPencilRig(pencilRig, camera, m);
+
     let width = 1;
     let height = 1;
-    let finalX = 0;
-    let finalScale = 0.5;
-    let p = 0;
+    let viewHeight = VIEW_HEIGHT_MIN;
+    let ps = 0;
+    let forcedP: number | null = null;
+    let faceColor: string | null = null;
     let raf = 0;
-    let last = 0;
-    let entrySpin = 0;
-    let entryCaptured = false;
-    const started = performance.now();
+    let last = performance.now();
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+
+    const rawP = () => {
+      if (!hero) return 0;
+      const total = Math.max(1, hero.offsetHeight - window.innerHeight);
+      return clamp01(-hero.getBoundingClientRect().top / total);
+    };
 
     const measure = () => {
       const rect = mount.getBoundingClientRect();
@@ -150,127 +190,122 @@ export default function HeroPencil3D() {
       renderer.setSize(width, height, false);
 
       const aspect = width / height;
-      camera.left = (-VIEW_HEIGHT * aspect) / 2;
-      camera.right = (VIEW_HEIGHT * aspect) / 2;
-      camera.top = VIEW_HEIGHT / 2;
-      camera.bottom = -VIEW_HEIGHT / 2;
+      viewHeight = Math.max(VIEW_HEIGHT_MIN, VIEW_WIDTH_FIT / Math.max(0.1, aspect));
+      camera.left = (-viewHeight * aspect) / 2;
+      camera.right = (viewHeight * aspect) / 2;
+      camera.top = viewHeight / 2;
+      camera.bottom = -viewHeight / 2;
       camera.updateProjectionMatrix();
 
-      const card = document.querySelector<HTMLElement>(".pencil-dock");
-      if (card) {
-        const cardRect = card.getBoundingClientRect();
-        const centerX = cardRect.left + cardRect.width / 2 - rect.left;
-        const worldPerPixel = VIEW_HEIGHT / height;
-        finalX = (centerX - width / 2) * worldPerPixel;
-        finalScale = Math.max(
-          0.18,
-          (cardRect.height * 0.78 * VIEW_HEIGHT) / (modelHeight * height),
-        );
-      }
+      faceColor = null;
+      if (forcedP === null) ps = rawP();
     };
 
-    const onPencil = (event: Event) => {
-      const detail = (event as CustomEvent<{ p: number }>).detail;
-      if (detail && typeof detail.p === "number") p = clamp(detail.p);
+    const faceColorFromCanvas = () => {
+      const gl = renderer.getContext();
+      const px = new Uint8Array(4);
+      gl.readPixels(
+        gl.drawingBufferWidth >> 1,
+        gl.drawingBufferHeight >> 1,
+        1,
+        1,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        px,
+      );
+      return `rgb(${px[0]}, ${px[1]}, ${px[2]})`;
     };
-
-    const resize = () => measure();
 
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop);
-      const delta = Math.min(0.05, (now - last) / 1000 || 0.016);
+      const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
       last = now;
-      const time = (now - started) / 1000;
 
-      let rz = -26;
-      let rx = 6;
-      let spin = time * 0.32;
-      let zoom = 1;
-      let scale = 1;
-      let x = 0;
-
-      if (p < 0.06) {
-        entryCaptured = false;
-        spin = time * 0.32;
-      } else if (p < 0.14) {
-        if (!entryCaptured) {
-          entrySpin = spinner.rotation.y;
-          entryCaptured = true;
-        }
-        const t = smooth(clamp((p - 0.06) / 0.08));
-        rz = lerp(-26, -90, t);
-        rx = lerp(6, 0, t);
-        spin = entrySpin + (FACE_ANGLE + Math.PI * 2 - entrySpin) * t;
-      } else if (p < 0.22) {
-        const t = smooth(clamp((p - 0.14) / 0.08));
-        rz = -90;
-        rx = 0;
-        spin = FACE_ANGLE;
-        zoom = lerp(1, ZOOM, t);
-      } else if (p < 0.78) {
-        rz = -90;
-        rx = 0;
-        spin = FACE_ANGLE;
-      } else if (p < 0.9) {
-        const e = smooth(clamp((p - 0.78) / 0.12));
-        rz = lerp(-90, 0, e);
-        rx = 0;
-        spin = lerp(FACE_ANGLE, 14, e);
-        zoom = lerp(ZOOM, 1, smooth(clamp(e / 0.3)));
-        scale = lerp(1, finalScale, e);
-        const xEase = smooth(clamp((e - 0.35) / 0.65));
-        x = lerp(0, finalX, xEase);
+      const target = forcedP ?? rawP();
+      if (forcedP !== null) {
+        ps = forcedP;
       } else {
-        rz = 0;
-        rx = 0;
-        spin = 14;
-        zoom = 1;
-        scale = finalScale;
-        x = finalX;
+        ps += (target - ps) * (1 - Math.exp(-dt * 10));
+        if (Math.abs(target - ps) < 1e-4) ps = target;
       }
 
-      if (p >= 0.22 && p < 0.78) {
-        zoom = ZOOM;
-      }
+      rig.tick(ps, dt, reduce.matches);
 
-      orientation.rotation.set(rx, 0, rz);
-      spinner.rotation.y = spin;
-      root.position.set(x, 0, 0);
-      root.scale.setScalar(scale);
-      const faceOnly = p >= 0.14 && p < 0.78;
-      panelFace.visible = faceOnly;
-      for (const mesh of meshes) {
-        if (mesh !== panelFace) mesh.visible = !faceOnly;
+      const eD = 1 - seg(ps, 0, 0.25);
+      for (const node of decorNodes) node.style.opacity = String(eD);
+
+      const eC = smoother(seg(ps, 0.88, 0.98));
+      const chapters = eC > 0.0001;
+      if (panel) {
+        panel.style.transition = "none";
+        panel.style.opacity = String(eC);
+        panel.style.visibility = chapters ? "visible" : "hidden";
+        panel.style.pointerEvents = eC >= 0.99 ? "auto" : "none";
       }
-      mount.dataset.p = p.toFixed(3);
-      mount.dataset.faceOnly = faceOnly ? "1" : "0";
-      mount.dataset.zoom = zoom.toFixed(2);
-      mount.dataset.rootX = x.toFixed(3);
-      mount.dataset.rootScale = scale.toFixed(3);
-      camera.zoom = zoom;
-      camera.updateProjectionMatrix();
-      renderer.render(scene, camera);
+      if (panelBg) panelBg.style.opacity = String(eC);
+      if (panelDecor) {
+        panelDecor.style.transition = "none";
+        panelDecor.style.opacity = String(eC);
+      }
+      if (hero) {
+        hero.classList.toggle("is-chapters", chapters);
+        hero.classList.toggle("is-step-1", chapters);
+      }
+      blocks.forEach((block, index) => {
+        block.classList.toggle("is-active", index === 0 && chapters);
+      });
+
+      const hidden = ps >= 0.995;
+      if (!hidden || (eC > 0.2 && !faceColor)) {
+        renderer.render(scene, camera);
+      }
+      if (eC > 0.2 && !faceColor) {
+        faceColor = faceColorFromCanvas();
+        if (panelBg) {
+          panelBg.style.backgroundImage = "none";
+          panelBg.style.backgroundColor = faceColor;
+        }
+      }
+      renderer.domElement.style.visibility = hidden ? "hidden" : "visible";
+
+      mount.dataset.p = ps.toFixed(4);
+      mount.dataset.view = viewHeight.toFixed(2);
     };
 
-    const hero = document.querySelector<HTMLElement>("[data-hero-pencil]");
-    if (hero) {
-      const total = Math.max(1, hero.offsetHeight - window.innerHeight);
-      p = clamp(-hero.getBoundingClientRect().top / total);
-    }
-
-    window.addEventListener("sparkle:pencil", onPencil);
-    window.addEventListener("resize", resize);
-    const observer = new ResizeObserver(resize);
+    const onResize = () => measure();
+    const observer = new ResizeObserver(onResize);
     observer.observe(mount);
+    window.addEventListener("resize", onResize);
 
     measure();
+    rig.tick(ps, 0, reduce.matches);
     raf = requestAnimationFrame(loop);
+
+    const api = {
+      setP: (value: number) => {
+        forcedP = clamp01(value);
+        ps = forcedP;
+      },
+      release: () => {
+        forcedP = null;
+      },
+      verifyEnd: () => rig.verifyEnd(),
+      sweep: () => rig.sweep(),
+      measure: measured,
+      m,
+      pose: (p: number, rs = 0.3) => rig.pose(p, rs, Math.ceil((rs + Math.PI * 3 + measured.faceTheta) / ((Math.PI * 2) / measured.nSides)) * ((Math.PI * 2) / measured.nSides) - measured.faceTheta),
+      getP: () => ps,
+      getFaceColor: () => faceColor,
+      meshCount: pencil.meshes.length,
+    };
+    (window as unknown as { __pencil: typeof api }).__pencil = api;
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("sparkle:pencil", onPencil);
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", onResize);
       observer.disconnect();
+      const current = (window as unknown as { __pencil?: typeof api }).__pencil;
+      if (current === api) delete (window as unknown as { __pencil?: typeof api }).__pencil;
       renderer.dispose();
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
@@ -279,7 +314,7 @@ export default function HeroPencil3D() {
           materials.forEach((material) => material.dispose());
         }
       });
-      mount.removeChild(renderer.domElement);
+      renderer.domElement.remove();
     };
   }, []);
 
