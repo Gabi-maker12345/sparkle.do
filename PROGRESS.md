@@ -339,3 +339,12 @@ Alturas de secção: 1440 **668/827/648** (original idêntico); 1024 **640/817/6
 - 1440 e 390: face/painel, capítulos, saída, cartão final; sem overflow.
 - Reduced motion e no-JS: painel estático, três blocos, sem canvas.
 - Produção em `http://localhost:3100`.
+
+## Revisão 13 — rotação de scroll no padrão definido
+
+- O idle continua a rodar apenas o `spinner` no eixo longitudinal; a inclinação (`orientation`) fica fixa.
+- Ao entrar no scroll (`0.06 → 0.14`), o lápis faz **uma volta completa sobre si mesmo enquanto vira para a horizontal**. Deixa de parar/alinhaar de imediato.
+- Só depois da virada (`0.14 → 0.22`) a câmara aproxima-se da face. O zoom durante a virada anterior criava fatias horizontais do corpo — removido.
+- A face frontal é a superfície do painel; só ela fica visível durante o mundo, sem fatias do corpo.
+- A saída continua: a câmara afasta-se, o mesmo lápis roda e diminui, e só no fim aparece o cartão final.
+- Verificado: a `0.12` o lápis está horizontal e inteiro; a `0.18` a face é limpa; a `0.22` entram os capítulos; sem overflow a 390; reduced/no-JS sem canvas.

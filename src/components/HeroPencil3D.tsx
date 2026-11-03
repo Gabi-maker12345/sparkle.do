@@ -200,7 +200,7 @@ export default function HeroPencil3D() {
         const t = smooth(clamp((p - 0.06) / 0.08));
         rz = lerp(-26, -90, t);
         rx = lerp(6, 0, t);
-        spin = lerp(entrySpin, FACE_ANGLE, t);
+        spin = entrySpin + (FACE_ANGLE + Math.PI * 2 - entrySpin) * t;
       } else if (p < 0.22) {
         const t = smooth(clamp((p - 0.14) / 0.08));
         rz = -90;
@@ -211,7 +211,6 @@ export default function HeroPencil3D() {
         rz = -90;
         rx = 0;
         spin = FACE_ANGLE;
-        zoom = ZOOM;
       } else if (p < 0.9) {
         const e = smooth(clamp((p - 0.78) / 0.12));
         rz = lerp(-90, 0, e);
@@ -228,6 +227,10 @@ export default function HeroPencil3D() {
         zoom = 1;
         scale = finalScale;
         x = finalX;
+      }
+
+      if (p >= 0.22 && p < 0.78) {
+        zoom = ZOOM;
       }
 
       orientation.rotation.set(rx, 0, rz);
