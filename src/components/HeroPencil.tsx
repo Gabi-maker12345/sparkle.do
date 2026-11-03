@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import Pencil from "./Pencil";
+import HeroPencil3D from "./HeroPencil3D";
 import { works } from "../data/site";
 
 const floatCards = [
@@ -126,11 +126,7 @@ export default function HeroPencil() {
 
         <div className="hero-pencil-wrap" aria-hidden="true">
           <span className="pencil-shadow" />
-          <div className="pencil-rig pencil-intro">
-            <div className="pencil-spin">
-              <Pencil />
-            </div>
-          </div>
+          <HeroPencil3D />
         </div>
 
         <div className="hero-panel-bg" aria-hidden="true" />

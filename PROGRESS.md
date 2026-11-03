@@ -278,3 +278,35 @@ Alturas de secção: 1440 **668/827/648** (original idêntico); 1024 **640/817/6
 - 390: cartão/CTA finais sem overflow.
 - Reduced motion e no-JS: painel estático, três blocos, decor visível, sem cartão/CTA.
 - Produção em `http://localhost:3100`.
+
+## Revisão 11 — lápis 3D fechado
+
+### Modelo
+- O lápis CSS foi substituído por um **modelo Three.js** com geometria fechada:
+  - corpo hexagonal `CylinderGeometry(..., 6, 1, false)` — eixos/tampas fechados;
+  - ferragem e banda fechadas;
+  - borracha em esfera achatada fechada;
+  - ponta de madeira em tronco de cone fechado e grafite em cone fechado.
+- Não há faces abertas/tubos: o interior nunca é visível. O lápis é o mesmo objeto do idle ao cartão final.
+- A luz vem de ambiente + duas direcionais; o material flat shading mostra as seis facetas.
+
+### Câmara e sequência
+- `0 → 0.06`: rotação idle sobre o próprio eixo.
+- `0.06 → 0.14`: vira para horizontal, sem zoom.
+- `0.14 → 0.22`: a câmara aproxima-se (zoom 36) da face frontal; a face transforma-se no fundo peach do painel.
+- `0.22 / 0.42 / 0.62`: os três capítulos.
+- `0.78 → 0.90`: saída; a câmara afasta-se, o mesmo lápis volta a rodar e **diminui** até ao cartão.
+- `0.90 → 1`: cartão + CTA.
+- O painel visível a 0.22 coincide com o fundo da face; a transição de texto continua escalonada.
+
+### Ajustes
+- O lápis ficou mais fino e comprido (raio 0.30, corpo 4.6), com borracha arredondada; deixou de parecer um tubo/crayon.
+- O cartão no mobile foi alinhado pelo centro (`--final-x`), eliminando o corte lateral.
+- O lápis final é desenhado pelo mesmo canvas 3D sobre o cartão, com escala calculada pela altura do cartão.
+
+### Verificação
+- `next build` e consola sem erros.
+- 1440: idle, face a 0.22, capítulos, saída, cartão final; sem overflow.
+- 390: painel e cartão/pencil finais sem overflow; cartão centrado.
+- Reduced motion e no-JS: painel estático e três blocos, sem canvas.
+- Produção em `http://localhost:3100`.

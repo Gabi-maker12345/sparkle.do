@@ -92,7 +92,22 @@
   inset: 0;
   z-index: 3;
   pointer-events: none;
-  opacity: clamp(0, calc(1 - (var(--face) - 0.82) * 6), 1);
+  opacity: 1;
+}
+
+.hero-3d {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.hero-3d canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.hero.is-world .hero-panel-bg {
+  opacity: 1;
 }
 
 .pencil-shadow {
@@ -789,7 +804,7 @@
   .story-h2 { font-size: clamp(2.5rem, 7.6vw, 3.8rem); }
   .hero-story-inner { min-height: 520px; }
   .story-caps { gap: 10px; }
-  .pencil-dock { left: 18px; width: 130px; height: 260px; }
+  .pencil-dock { width: 130px; height: 260px; }
   .pencil-dock-star { right: 12px; top: 10px; font-size: 14px; }
 
   .story-block-3 .story-h2 { font-size: clamp(1.85rem, 8vw, 2.4rem); max-width: none; }
@@ -811,7 +826,7 @@
   .story-cap h3 { font-size: 9px; }
   .story-cap p { font-size: 11.5px; }
   .story-cap-icon svg { width: 18px; height: 18px; }
-  .pencil-dock { left: 14px; width: 120px; height: 238px; }
+  .pencil-dock { width: 120px; height: 238px; }
   .hero-stage { --final-scale: 0.53; --final-x: 74px; }
   .story-block-3 .story-h2 { font-size: 1.72rem; }
   .story-block-3 .story-lede { font-size: 0.82rem; line-height: 1.45; }
@@ -838,6 +853,7 @@
   .hero-emojis,
   .hero-kicker,
   .hero-pencil-wrap,
+  .hero-3d,
   .hero-cue,
   .pencil-dock,
   .pencil-final,

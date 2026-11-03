@@ -24,7 +24,7 @@ export function initPencil(): void {
 
     const enter = smooth(clamp(p / 0.18));
     const zoom = Math.pow(clamp(p / 0.18), 5);
-    const exit = smooth(clamp((p - 0.76) / 0.14));
+    const exit = smooth(clamp((p - 0.78) / 0.12));
     stage.style.setProperty("--exit", exit.toFixed(4));
 
     const scale =
@@ -52,15 +52,14 @@ export function initPencil(): void {
     stage.style.setProperty("--rot-y", `${ry.toFixed(3)}deg`);
     stage.style.setProperty("--rot-z", `${rz.toFixed(3)}deg`);
 
-    const step = p >= 0.6 ? 3 : p >= 0.4 ? 2 : p >= 0.18 ? 1 : 0;
-    const chapters = step > 0 && p < 0.76;
+    const step = p >= 0.62 ? 3 : p >= 0.42 ? 2 : p >= 0.22 ? 1 : 0;
+    const chapters = step > 0 && p < 0.78;
 
-    hero.classList.toggle("is-panel", p >= 0.18);
-    hero.classList.toggle("is-entering", p >= 0.1 && p < 0.18);
-    hero.classList.toggle("is-world", p >= 0.18 && p < 0.76);
+    hero.classList.toggle("is-panel", p >= 0.22);
+    hero.classList.toggle("is-world", p >= 0.22 && p < 0.78);
     hero.classList.toggle("is-chapters", chapters);
-    hero.classList.toggle("is-exit", p >= 0.76);
-    hero.classList.toggle("is-exiting", p >= 0.76 && p < 0.9);
+    hero.classList.toggle("is-exit", p >= 0.78);
+    hero.classList.toggle("is-exiting", p >= 0.78 && p < 0.9);
     hero.classList.toggle("is-final", p >= 0.9);
     hero.classList.toggle("is-step-1", chapters && step === 1);
     hero.classList.toggle("is-step-2", chapters && step === 2);
@@ -69,6 +68,10 @@ export function initPencil(): void {
     blocks.forEach((block, index) => {
       block.classList.toggle("is-active", chapters && index === step - 1);
     });
+
+    window.dispatchEvent(
+      new CustomEvent("sparkle:pencil", { detail: { p } }),
+    );
   };
 
   const update = () => {
