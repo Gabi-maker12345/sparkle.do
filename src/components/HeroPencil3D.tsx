@@ -178,6 +178,7 @@ export default function HeroPencil3D() {
     let faceColor: string | null = null;
     let raf = 0;
     let last = performance.now();
+    let readyDispatched = false;
     const reduce = matchMedia("(prefers-reduced-motion: reduce)");
 
     const rawP = () => {
@@ -288,6 +289,12 @@ export default function HeroPencil3D() {
         }
       }
       renderer.domElement.style.visibility = hidden ? "hidden" : "visible";
+
+      if (!readyDispatched) {
+        readyDispatched = true;
+        (window as Window & { __appReady?: boolean }).__appReady = true;
+        window.dispatchEvent(new CustomEvent("sparkle:ready"));
+      }
 
       mount.dataset.p = ps.toFixed(4);
       mount.dataset.view = viewHeight.toFixed(2);

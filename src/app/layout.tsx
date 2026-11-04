@@ -10,10 +10,12 @@ import "../styles/faq.css";
 import "../styles/process.css";
 import "../styles/gallery.css";
 import "../styles/footer.css";
+import "../styles/preloader.css";
 
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import ClientRuntime from "../components/ClientRuntime";
+import Preloader from "../components/Preloader";
 
 const title = "Sparkle.do — Portfólios e cartões de visita automáticos";
 const description =
@@ -57,12 +59,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR" className="js" suppressHydrationWarning>
       <body suppressHydrationWarning>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `#sparkle-preloader{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#fffbf4;color:#4e1e2a;overflow:hidden}.sparkle-preloader .preloader-static{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.sparkle-preloader .preloader-animated{opacity:0;visibility:hidden}`,
+          }}
+        />
+        <Preloader />
         <SiteHeader />
         <main id="page">{children}</main>
         <SiteFooter />
         <ClientRuntime />
         <noscript>
-          <style>{`[data-reveal]{opacity:1!important;transform:none!important}.hero{height:auto!important;min-height:100svh!important}.hero-stage{position:relative!important;height:auto!important;min-height:100svh!important;overflow:visible!important}.hero-float,.hero-emojis,.pencil-intro,.hero-kicker,.hero-cue,.pencil-dock,.pencil-final,.pencil-final-shadow,.hero-pencil-wrap{display:none!important}.hero-3d{display:none!important}.hero-panel-bg{opacity:1!important}.hero-panel-decor{opacity:1!important}.hero-progress,.hero-final-copy{display:none!important}.story-block>*,.story-block .story-cap{opacity:1!important;transform:none!important;transition:none!important}.hero-story{position:relative!important;inset:auto!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;padding:108px 6vw 88px!important}.hero-story-inner{display:flex!important;flex-direction:column!important;gap:64px!important;min-height:0!important;padding:0!important}.story-block{position:relative!important;grid-area:auto!important;opacity:1!important;visibility:visible!important;transform:none!important;pointer-events:auto!important;transition:none!important}.story-spark{animation:none!important}`}</style>
+          <style>{`#sparkle-preloader{display:none!important}html.preloader-active,html.preloader-active body{overflow:auto!important}[data-reveal]{opacity:1!important;transform:none!important}.hero{height:auto!important;min-height:100svh!important}.hero-stage{position:relative!important;height:auto!important;min-height:100svh!important;overflow:visible!important}.hero-float,.hero-emojis,.pencil-intro,.hero-kicker,.hero-cue,.pencil-dock,.pencil-final,.pencil-final-shadow,.hero-pencil-wrap{display:none!important}.hero-3d{display:none!important}.hero-panel-bg{opacity:1!important}.hero-panel-decor{opacity:1!important}.hero-progress,.hero-final-copy{display:none!important}.story-block>*,.story-block .story-cap{opacity:1!important;transform:none!important;transition:none!important}.hero-story{position:relative!important;inset:auto!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;padding:108px 6vw 88px!important}.hero-story-inner{display:flex!important;flex-direction:column!important;gap:64px!important;min-height:0!important;padding:0!important}.story-block{position:relative!important;grid-area:auto!important;opacity:1!important;visibility:visible!important;transform:none!important;pointer-events:auto!important;transition:none!important}.story-spark{animation:none!important}`}</style>
         </noscript>
       </body>
     </html>
