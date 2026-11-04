@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { works } from "../data/site";
+import { formats, works } from "../data/site";
 
 const rows = [works.slice(0, 4), works.slice(4, 8)];
 
@@ -61,9 +61,14 @@ export default function WorkGallery() {
 
       <div className="work-foot" data-reveal="">
         <p>Oito estudos. O próximo é o seu.</p>
-        <a className="work-cta" href="#formats">
-          Escolher formato
-        </a>
+        <nav className="work-foot-index" aria-label="Formatos disponíveis">
+          <span className="work-foot-label">Formatos</span>
+          {formats.map((format) => (
+            <a href="#formats" key={format.id}>
+              {format.title}
+            </a>
+          ))}
+        </nav>
       </div>
     </section>
   );

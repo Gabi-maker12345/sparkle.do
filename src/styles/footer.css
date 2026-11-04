@@ -128,42 +128,46 @@
   opacity: 0.82;
 }
 
-.footer-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 18px;
-  height: 52px;
-  padding: 0 18px 0 26px;
-  border-radius: 999px;
-  background: var(--wine);
-  color: var(--paper);
+.footer-card-contact {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  text-align: right;
+}
+
+.footer-card-label {
+  margin: 0;
   font-family: var(--font-label);
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 700;
-  white-space: nowrap;
-  text-decoration: none;
-  box-shadow: 0 0 0 2.5px var(--deep), 4px 5px 0 2.5px var(--deep);
-  transition: transform 0.3s var(--pop);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wine-mid);
 }
 
-.footer-cta span:last-child {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--peach);
+.footer-card-contact a {
+  padding-bottom: 2px;
+  border-bottom: 1px solid rgba(78, 30, 42, 0.45);
   color: var(--wine);
-  font-size: 15px;
-  transition: transform 0.4s var(--pop);
+  font-family: var(--font-display);
+  font-size: clamp(22px, 2.2vw, 30px);
+  line-height: 1.05;
+  text-decoration: none;
+  transition: border-color 0.25s ease, color 0.25s ease;
 }
 
-.footer-cta:hover {
-  transform: translateY(-2px);
+.footer-card-contact a:hover {
+  border-color: var(--wine);
+  color: var(--wine-mid);
 }
 
-.footer-cta:hover span:last-child {
-  transform: rotate(-35deg);
+.footer-card-contact a span {
+  display: inline-block;
+  margin-left: 4px;
+  font-family: var(--font-label);
+  font-size: 0.6em;
+  vertical-align: 0.35em;
 }
 
 /* the columns */
@@ -384,6 +388,11 @@
     align-items: flex-start;
     gap: 28px;
     padding: 32px 34px;
+  }
+
+  .footer-card-contact {
+    align-items: flex-start;
+    text-align: left;
   }
 
   .footer-wordmark {

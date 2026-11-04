@@ -151,47 +151,37 @@
   color: var(--wine);
 }
 
-.work-cta {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  height: 54px;
-  padding: 0 66px 0 26px;
-  border-radius: 999px;
-  background: var(--wine);
-  color: var(--paper);
+.work-foot-index {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.work-foot-label {
+  margin-bottom: 5px;
   font-family: var(--font-label);
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wine-mid);
+}
+
+.work-foot-index a {
+  padding-block: 2px;
+  border-bottom: 1px solid transparent;
+  color: var(--wine);
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: 1.1;
   text-decoration: none;
-  white-space: nowrap;
-  box-shadow: 0 0 0 2.5px var(--deep), 5px 5px 0 2.5px var(--deep);
-  transition: transform 0.3s var(--pop);
+  transition: border-color 0.25s ease, color 0.25s ease;
 }
 
-.work-cta::after {
-  content: "";
-  position: absolute;
-  right: -20px;
-  top: 50%;
-  width: 56px;
-  height: 56px;
-  margin-top: -28px;
-  border-radius: 58% 42% 46% 54% / 50% 60% 40% 50%;
-  background: var(--peach)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12h14M13 6l6 6-6 6' fill='none' stroke='%234E1E2A' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
-    center / 22px no-repeat;
-  box-shadow: 0 0 0 2.5px var(--deep), 4px 4px 0 2.5px var(--deep);
-  transition: transform 0.45s var(--pop);
-}
-
-.work-cta:hover {
-  transform: translateY(-2px);
-}
-
-.work-cta:hover::after {
-  transform: rotate(-35deg);
+.work-foot-index a:hover {
+  border-color: var(--wine);
+  color: var(--wine-mid);
 }
 
 @media (max-width: 900px) {
@@ -217,6 +207,11 @@
     flex-direction: column;
     align-items: flex-start;
     margin-top: 36px;
+  }
+
+  .work-foot-index {
+    align-items: flex-start;
+    margin-top: 12px;
   }
 }
 

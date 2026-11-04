@@ -39,10 +39,12 @@ export default function SiteFooter() {
               encontrado.
             </p>
           </div>
-          <a className="footer-cta" href="#formats">
-            <span>Criar o meu</span>
-            <span aria-hidden="true">→</span>
-          </a>
+          <div className="footer-card-contact">
+            <p className="footer-card-label">Um projeto em mente?</p>
+            <a href="mailto:gcristovao262@gmail.com">
+              Escreva para nós <span aria-hidden="true">↗</span>
+            </a>
+          </div>
         </div>
 
         <div className="footer-grid">
