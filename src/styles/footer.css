@@ -330,6 +330,8 @@
 }
 
 .footer-bottom a {
+  display: inline-block;
+  padding-block: 6px;
   color: var(--peach);
   text-decoration: none;
 }
