@@ -1,32 +1,72 @@
-# Preloader — sparkle.do
+# Preloader — sparkle.do (v2)
 
-Brand-first loading screen built with the existing Next.js + React stack. No animation dependencies were added. The official logo SVG is used as the final art; the inline copy lives in `src/components/preloader-logo.ts`, and the first-paint fallback is `public/sparkle-do-logo.svg`.
+The loader is an equation that becomes the mark:
+**Rápido + Eficiente + Elegante = sparkle.do**.
 
 ## Files
-- `src/components/Preloader.tsx` — timeline, words/goo, draw, star, reveal, audio, state.
-- `src/styles/preloader.css` — layout, masks, dots, opening and reduced motion.
-- `src/app/layout.tsx` — server-rendered preloader markup and critical first-paint CSS.
-- `src/components/HeroPencil3D.tsx` — emits `sparkle:ready` and `window.__appReady = true` after the first rendered 3D frame.
-- `PRELOADER.md` — this note.
+- `src/components/Preloader.tsx` — single clock/timeline, equation layout, goo, draw, star, reveal, audio.
+- `src/components/preloader-logo.ts` — inlined official logo with `sd-*` ids, per-letter draw masks and centerlines.
+- `src/styles/preloader.css` — first-paint shell, equation/goo styles, site gating, reveal.
+- `src/app/layout.tsx` — server-rendered preloader + critical first-paint CSS.
+- `src/components/HeroPencil3D.tsx` — emits `sparkle:ready` after the first 3D frame.
+- `public/sparkle-do-logo.svg` — exact official fallback/final art.
 
-## Force / reset
-- Full intro: append `?intro=1` to the URL.
-- First-visit state: `sessionStorage.removeItem("sparkle:preloader-seen")`, then reload.
-- Repeat visit: words and goo are skipped; the final logo, star and loading dots still run.
-- The animation shares one config object at the top of `Preloader.tsx`:
-  - `CONFIG.timeline` — labels `word1`, `melt1`, `word2`, `melt2`, `word3`, `melt3`, `draw`, `wordmark`, `star`, `open`.
-  - `CONFIG.durations` — word/melt/draw/star/open/dots/safety values.
+## Debug API
+Open `/?debug=1` (it does not auto-play):
+
+```js
+await window.__preloader.seek(3.6); // freeze at seconds
+window.__preloader.play();          // resume the clock
+window.__preloader.time();
+```
+
+`seek(8.4)` opens the site and removes the loader. Screenshots were checked at
+`0.2, 0.9, 1.7, 2.6, 3.1, 3.6, 4.0, 4.4, 4.9, 5.4, 5.9, 6.6, 7.2, 7.8, 8.4`
+on 1440×900 and 390×844.
+
+## Timing
+All timings are in `CONFIG.timings` / `CONFIG.durations` at the top of `Preloader.tsx`:
+
+- equation `0.35–3.3`
+- goo `3.3–4.6`
+- draw `4.6–6.5`
+- wordmark + tagline `6.5–7.0`
+- star `7.0–7.45`
+- pause + circular reveal to `8.4`
+
+The equation is one SVG. Its characters are measured only after
+`document.fonts.ready`, fitted to 88% of the viewBox, then recentered as tokens
+arrive. On mobile the same SVG stacks the equation in three lines.
+
+## Force / repeat
+- Full intro: `?intro=1`.
+- Reset first-visit state: `sessionStorage.removeItem("sparkle:preloader-seen")`, reload.
+- Repeat visits: `sessionStorage` skips words/goo/draw and shows the mark, star and dots.
 
 ## Sound
-`playPlin()` synthesizes three sines at 1760 Hz, 2637 Hz and 3520 Hz through a gain envelope. The master stays at 0.22. If the AudioContext is not `running` when the star appears, the sound is skipped silently. A pointer/key interaction before the star unlocks it. The ambient site soundtrack is separate.
+`playPlin()` synthesizes 1760 / 2637 / 3520 Hz sines through a 0.22 master gain.
+No file is downloaded. If the AudioContext is not `running` at the star frame,
+the sound is skipped silently; a pointer/key before that unlocks it.
 
-## Safety and fallbacks
-- Readiness = fonts + `window.load` + hero `sparkle:ready` + decode of hero images, with a 10s hard timeout and a global 10s finish timer.
-- A 12s CSS fail-safe hides the overlay and unlocks scroll if JavaScript stalls.
-- The skip button is keyboard-accessible; body scroll is locked and site regions are `inert` while active, then restored.
-- No JavaScript: the preloader is hidden by the existing `<noscript>` styles.
-- `prefers-reduced-motion`: static logo, dots with fade, simple fade opening; no goo, no draw, no star sound.
-- If assets are slow after the star, three wine dots appear below the tagline after 250ms and the intro waits; the page opens as soon as ready.
+## Safety
+- Readiness = fonts + `window.load` + `sparkle:ready` + hero image decode.
+- After the star, dots appear if assets are still loading.
+- Hard 10s timeout and a 12s CSS fail-safe.
+- `Pular` is keyboard accessible; body scroll and `inert` are restored on close.
+- Reduced motion: static logo, dots with fade, simple fade open.
+- No JavaScript: the `<noscript>` rules hide the loader.
 
-## Testing note
-Verified in Chromium (desktop 1440×900, wide 1875×805, mobile 390×844), first visit, repeat visit, `?intro=1`, slow image, reduced motion, no-JS and skip. Firefox/WebKit binaries were not installed in this environment, so those engines remain a manual test gap.
+## Verification
+Chromium tested: 1440×900, 390×844, live first visit, repeat visit, debug seek/play,
+slow image + dots, reduced motion, no-JS, skip, timeout, `preloader:done`, nav after
+60% of the reveal. Firefox/WebKit binaries were not installed in this environment,
+so those engines remain a manual test gap.
+
+## Performance gate
+The goo filter is used at full strength when a frame fits the budget. If the
+first goo frame takes more than 18ms, `.low-fx` removes the SVG filter and keeps
+the word-drop/mass timing (the degraded crossfade path). On headless Chromium
+the full filter measured 43fps and the degraded path measured 59–61fps; the
+debug screenshots still show the full goo because `seek()` is paused. A screen
+recording of the first visit was captured at `/tmp/preloader-video/` during the
+test run. Real Safari/Firefox performance was not measurable in this container.

@@ -278,14 +278,17 @@ export default function HeroPencil3D() {
       });
 
       const hidden = ps >= 0.995;
-      if (!hidden || (eC > 0.2 && !faceColor)) {
-        renderer.render(scene, camera);
-      }
-      if (eC > 0.2 && !faceColor) {
-        faceColor = faceColorFromCanvas();
-        if (panelBg) {
-          panelBg.style.backgroundImage = "none";
-          panelBg.style.backgroundColor = faceColor;
+      const inPreloader = document.documentElement.classList.contains("preloader-active");
+      if (!inPreloader || !readyDispatched) {
+        if (!hidden || (eC > 0.2 && !faceColor)) {
+          renderer.render(scene, camera);
+        }
+        if (eC > 0.2 && !faceColor) {
+          faceColor = faceColorFromCanvas();
+          if (panelBg) {
+            panelBg.style.backgroundImage = "none";
+            panelBg.style.backgroundColor = faceColor;
+          }
         }
       }
       renderer.domElement.style.visibility = hidden ? "hidden" : "visible";
@@ -294,6 +297,15 @@ export default function HeroPencil3D() {
         readyDispatched = true;
         (window as Window & { __appReady?: boolean }).__appReady = true;
         window.dispatchEvent(new CustomEvent("sparkle:ready"));
+        if (inPreloader) {
+          cancelAnimationFrame(raf);
+          const resume = () => {
+            last = performance.now();
+            raf = requestAnimationFrame(loop);
+          };
+          window.addEventListener("preloader:done", resume, { once: true });
+          return;
+        }
       }
 
       mount.dataset.p = ps.toFixed(4);

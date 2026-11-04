@@ -1,4 +1,4 @@
-/* Sparkle.do preloader — brand first paint, then words, goo, drawn logo. */
+/* Sparkle.do preloader v2 — equation, goo, drawn mark, star, reveal. */
 
 .sparkle-preloader {
   position: fixed;
@@ -17,28 +17,11 @@
   animation: preloaderFailSafe 0.01s linear 12s forwards;
 }
 
-.sparkle-preloader.is-opening {
-  pointer-events: none;
-  background: var(--peach);
-}
-
-.sparkle-preloader.is-opening .preloader-stage,
-.sparkle-preloader.is-opening .preloader-logo,
-.sparkle-preloader.is-opening .preloader-top,
-.sparkle-preloader.is-opening .preloader-index,
-.sparkle-preloader.is-opening .preloader-skip,
-.sparkle-preloader.is-opening .preloader-dots,
-.sparkle-preloader.is-opening .preloader-sparks {
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.12s ease, visibility 0s linear 0.12s;
-}
-
 .preloader-top {
   position: absolute;
   top: max(22px, env(safe-area-inset-top));
   left: 50%;
-  z-index: 4;
+  z-index: 6;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -55,7 +38,6 @@
 }
 
 .preloader-top span {
-  color: var(--wine-mid);
   font-size: 1.2em;
 }
 
@@ -74,88 +56,7 @@
   height: 100%;
   object-fit: contain;
   opacity: 1;
-  transition: opacity 0.28s ease, visibility 0s linear 0.28s;
-}
-
-.sparkle-preloader.show-words .preloader-static,
-.sparkle-preloader.show-draw .preloader-static,
-.sparkle-preloader.is-short .preloader-static {
-  opacity: 0;
-  visibility: hidden;
-}
-
-.sparkle-preloader.is-final-logo .preloader-static {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.18s ease, visibility 0s linear 0s;
-}
-
-.sparkle-preloader.is-final-logo .preloader-logo {
-  opacity: 0;
-  visibility: hidden;
   transition: opacity 0.18s ease, visibility 0s linear 0.18s;
-}
-
-.preloader-animated {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  opacity: 0;
-  visibility: hidden;
-}
-
-.sparkle-preloader.show-words .preloader-animated,
-.sparkle-preloader.show-draw .preloader-animated,
-.sparkle-preloader.is-short .preloader-animated {
-  opacity: 1;
-  visibility: visible;
-}
-
-.preloader-words {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 100vw;
-  height: 100dvh;
-  max-width: none;
-  transform: translate(-50%, -50%);
-  overflow: visible;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.18s ease;
-}
-
-.sparkle-preloader.show-words .preloader-words {
-  opacity: 1;
-}
-
-.sparkle-preloader.show-draw .preloader-words {
-  opacity: 0;
-}
-
-.preloader-word {
-  transform-box: view-box;
-  transform-origin: 500px 260px;
-}
-
-.preloader-letter {
-  fill: var(--wine);
-  font-family: var(--font-display);
-  font-size: 150px;
-  font-weight: 400;
-  letter-spacing: 0;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.preloader-letter.preloader-plus {
-  fill: var(--wine-mid);
-}
-
-.preloader-mass {
-  transform-box: view-box;
-  transform-origin: 500px 260px;
 }
 
 .preloader-logo {
@@ -166,14 +67,7 @@
   opacity: 0;
   visibility: hidden;
   transform: scale(0.965);
-  transition: opacity 0.2s ease, transform 0.35s var(--spring);
-}
-
-.sparkle-preloader.show-draw .preloader-logo,
-.sparkle-preloader.is-short .preloader-logo {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
+  transition: opacity 0.18s ease, transform 0.3s var(--spring), visibility 0s linear 0.18s;
 }
 
 .preloader-logo-svg {
@@ -183,12 +77,14 @@
   overflow: visible;
 }
 
-/* The actual logo groups are hidden until their act. */
+.preloader-logo-svg #pre-s-complete {
+  visibility: hidden;
+}
+
 .preloader-logo-svg #sd-wordmark,
 .preloader-logo-svg #sd-tagline,
 .preloader-logo-svg #sd-star,
-.preloader-logo-svg #sd-pencil,
-.preloader-logo-svg #pre-draw-pencil {
+.preloader-logo-svg #sd-pencil {
   opacity: 0;
 }
 
@@ -230,6 +126,57 @@
   animation-delay: 0.24s;
 }
 
+/* ---------- equation ---------- */
+
+.pre-eq-svg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(92vw, 1100px);
+  height: auto;
+  transform: translate(-50%, -50%);
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+#pre-eq-group {
+  transform-box: view-box;
+}
+
+.pre-eq-word,
+.pre-eq-symbol {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.pre-eq-char {
+  fill: var(--wine);
+  font-family: var(--font-display);
+  font-size: var(--eq-size, 150px);
+  font-weight: 400;
+  letter-spacing: 0;
+  dominant-baseline: middle;
+  text-anchor: start;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.pre-eq-symbol .pre-eq-char {
+  fill: var(--wine-mid);
+}
+
+.pre-eq-drop {
+  fill: var(--wine);
+  opacity: 0;
+  visibility: hidden;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ---------- fixed loader chrome ---------- */
+
 .preloader-index {
   position: absolute;
   right: max(24px, env(safe-area-inset-right));
@@ -243,11 +190,6 @@
   font-weight: 600;
   letter-spacing: 0.16em;
   transition: opacity 0.25s ease, visibility 0s linear 0.25s;
-}
-
-.sparkle-preloader.is-goo .preloader-index {
-  opacity: 0;
-  visibility: hidden;
 }
 
 .preloader-index span {
@@ -282,7 +224,7 @@
   position: absolute;
   left: max(20px, env(safe-area-inset-left));
   bottom: max(20px, env(safe-area-inset-bottom));
-  z-index: 4;
+  z-index: 6;
   min-height: 44px;
   padding: 0 4px;
   border: 0;
@@ -324,45 +266,98 @@
   will-change: transform, opacity;
 }
 
-/* The site enters after the circular reveal. */
+/* ---------- site gating / reveal ---------- */
+
+html.preloader-active .site-header,
+html.preloader-active #page,
+html.preloader-active .site-footer {
+  visibility: hidden;
+}
+
+html.preloader-opening #page,
+html.preloader-opening .site-footer {
+  visibility: visible;
+}
+
+html.preloader-opening .site-header {
+  visibility: hidden;
+  opacity: 0;
+}
+
+html.preloader-opening.preloader-nav-in .site-header {
+  visibility: visible;
+  opacity: 1;
+}
+
 html.preloader-active,
-html.preloader-active body {
+html.preloader-active body,
+html.preloader-opening,
+html.preloader-opening body {
   overflow: hidden;
 }
 
-html.preloader-active {
-  animation: preloaderUnlock 0.01s linear 12s forwards;
+html.preloader-opening.preloader-nav-in .site-header .header-row {
+  animation: preloaderNavIn 0.55s var(--spring) both;
 }
 
-html.preloader-active body {
-  animation: preloaderUnlock 0.01s linear 12s forwards;
+html.preloader-opening #page .hero-pencil-wrap,
+html.preloader-revealed #page .hero-pencil-wrap {
+  animation: preloaderHeroIn 0.75s var(--spring) both;
 }
 
-html.preloader-revealed .site-header .header-row {
-  animation: preloaderNavIn 0.65s var(--spring) both;
+html.preloader-opening #page .hero-float,
+html.preloader-opening #page .hero-emojis,
+html.preloader-opening #page .hero-kicker,
+html.preloader-revealed #page .hero-float,
+html.preloader-revealed #page .hero-emojis,
+html.preloader-revealed #page .hero-kicker {
+  animation: preloaderFadeIn 0.8s var(--soft) 0.08s both;
 }
 
-html.preloader-revealed .hero-pencil-wrap {
-  animation: preloaderHeroIn 0.8s var(--spring) both;
+/* opening removes its own chrome */
+#sparkle-preloader.is-opening .preloader-top,
+#sparkle-preloader.is-opening .preloader-index,
+#sparkle-preloader.is-opening .preloader-skip,
+#sparkle-preloader.is-opening .preloader-dots {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.12s ease, visibility 0s linear 0.12s;
 }
 
-html.preloader-revealed .hero-float,
-html.preloader-revealed .hero-emojis,
-html.preloader-revealed .hero-kicker {
-  animation: preloaderFadeIn 0.9s var(--soft) 0.12s both;
+.preloader-logo-svg #pre-eq-mass {
+  opacity: 0;
+  visibility: hidden;
 }
 
-.sparkle-preloader.is-reduced .preloader-words {
-  display: none;
+.pre-eq-word-drop,
+.pre-eq-mass-blob {
+  fill: var(--wine);
 }
 
+.pre-eq-mass-blob {
+  fill: var(--wine);
+}
+
+.sparkle-preloader.is-debug .preloader-static,
+.sparkle-preloader.is-debug .preloader-logo,
+.sparkle-preloader.is-debug .preloader-stage,
+.sparkle-preloader.is-debug .preloader-dots,
+.sparkle-preloader.is-debug .pre-eq-word,
+.sparkle-preloader.is-debug .pre-eq-symbol {
+  transition: none !important;
+}
+
+.sparkle-preloader.low-fx #pre-eq-group {
+  filter: none !important;
+}
+
+.sparkle-preloader.is-reduced .pre-eq-svg,
 .sparkle-preloader.is-reduced .preloader-dots span {
   animation: none;
-  opacity: 0.75;
 }
 
 @keyframes preloaderDot {
-  0%, 100% { transform: translateY(0); opacity: 0.42; }
+  0%, 100% { transform: translateY(0); opacity: 0.62; }
   45% { transform: translateY(-5px); opacity: 1; }
 }
 
@@ -389,12 +384,26 @@ html.preloader-revealed .hero-kicker {
   to { overflow: auto; }
 }
 
+html.preloader-active,
+html.preloader-opening {
+  animation: preloaderUnlock 0.01s linear 12s forwards;
+}
+
+html.preloader-active body,
+html.preloader-opening body {
+  animation: preloaderUnlock 0.01s linear 12s forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  html.preloader-revealed .site-header .header-row,
-  html.preloader-revealed .hero-pencil-wrap,
-  html.preloader-revealed .hero-float,
-  html.preloader-revealed .hero-emojis,
-  html.preloader-revealed .hero-kicker {
+  html.preloader-opening .site-header .header-row,
+  html.preloader-opening #page .hero-pencil-wrap,
+  html.preloader-opening #page .hero-float,
+  html.preloader-opening #page .hero-emojis,
+  html.preloader-opening #page .hero-kicker,
+  html.preloader-revealed #page .hero-pencil-wrap,
+  html.preloader-revealed #page .hero-float,
+  html.preloader-revealed #page .hero-emojis,
+  html.preloader-revealed #page .hero-kicker {
     animation: none;
   }
 }
