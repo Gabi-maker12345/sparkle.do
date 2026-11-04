@@ -194,6 +194,8 @@
 
 .footer-col a {
   position: relative;
+  display: inline-block;
+  padding-block: 3px;
   overflow-wrap: anywhere;
   font-size: 15px;
   text-decoration: none;

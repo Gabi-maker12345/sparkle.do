@@ -6,7 +6,6 @@ import { initFaq } from "../scripts/faq";
 import { initHeader } from "../scripts/header";
 import { initHow } from "../scripts/how";
 import { initReveal } from "../scripts/reveal";
-import { initTickets } from "../scripts/tickets";
 
 let booted = false;
 
@@ -16,7 +15,6 @@ export default function ClientRuntime() {
     booted = true;
 
     initHeader();
-    initTickets();
     initFaq();
     initHow();
     initAudio();

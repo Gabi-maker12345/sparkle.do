@@ -369,3 +369,15 @@
     display: none;
   }
 }
+
+
+/* Very narrow phones: keep the monogram, lose the clipped wordmark. */
+@media (max-width: 359px) {
+  .brand {
+    gap: 0;
+    padding-inline: 10px;
+  }
+  .brand .wordmark {
+    display: none;
+  }
+}

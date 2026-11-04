@@ -591,6 +591,7 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  min-height: 44px;
   margin-top: 28px;
   padding: 0 2px 8px;
   border-bottom: 1px solid rgba(78, 30, 42, 0.5);
